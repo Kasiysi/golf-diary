@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+/* Pro dark glassmorphism – deep charcoal + neon green accent */
+:root {
+  --background: #1a1a1c;
+  --foreground: #fafafa;
+  --card: rgba(255, 255, 255, 0.05);
+  --card-foreground: #fafafa;
+  --border: rgba(255, 255, 255, 0.1);
+  --muted: rgba(255, 255, 255, 0.08);
+  --muted-foreground: #a3a3a3;
+  --accent: #39ff14;
+  --accent-foreground: #0a0a0a;
+  --ring: #39ff14;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Glassmorphism cards: use .glass class for bg-white/5 + backdrop-blur-xl + border-white/10 */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+* {
+  border-color: var(--border);
+}
