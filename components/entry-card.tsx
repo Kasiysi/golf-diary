@@ -106,17 +106,20 @@ export function EntryCard({
   const videoUrl = firstMedia?.type === "video" ? fullMediaUrl(firstMedia.url) : "";
   const videoThumbUrl = firstMedia?.type === "video" ? fullMediaUrl(firstMedia?.thumbnailUrl) : "";
   const imageUrl = firstMedia?.type === "image" ? fullMediaUrl(firstMedia.url) : "";
-  const showVideoThumb = firstMedia?.type === "video" && hasValidMediaUrl(videoThumbUrl);
-  const showVideoElement = firstMedia?.type === "video" && hasValidMediaUrl(videoUrl) && !showVideoThumb;
-  const showNextImage = firstMedia?.type === "image" && hasValidMediaUrl(firstMedia.url) && isAllowedImageUrl(firstMedia.url);
-  const showImgFallback = firstMedia?.type === "image" && hasValidMediaUrl(firstMedia.url) && !showNextImage;
+  const hasVideoUrl = hasValidMediaUrl(videoUrl);
+  const hasVideoThumbUrl = hasValidMediaUrl(videoThumbUrl);
+  const hasImageUrl = hasValidMediaUrl(imageUrl) && imageUrl.length > 0;
+  const showVideoThumb = firstMedia?.type === "video" && hasVideoThumbUrl;
+  const showVideoElement = firstMedia?.type === "video" && hasVideoUrl && !showVideoThumb;
+  const showNextImage = firstMedia?.type === "image" && hasImageUrl && isAllowedImageUrl(firstMedia.url);
+  const showImgFallback = firstMedia?.type === "image" && hasImageUrl && !showNextImage;
   const showIcon = !firstMedia || (!showVideoThumb && !showVideoElement && !showNextImage && !showImgFallback);
 
   const mediaThumb = (
     <div className={cn(thumbContainerClass, "bg-white/5 backdrop-blur-sm border border-white/10")}>
       {firstMedia?.type === "video" && (showVideoThumb || showVideoElement) ? (
         <>
-          {showVideoThumb ? (
+          {showVideoThumb && videoThumbUrl ? (
             <Image
               src={videoThumbUrl}
               alt=""
@@ -125,7 +128,7 @@ export function EntryCard({
               className="object-cover rounded-2xl"
               unoptimized
             />
-          ) : (
+          ) : showVideoElement && videoUrl ? (
             <video
               src={videoUrl}
               muted
@@ -133,12 +136,12 @@ export function EntryCard({
               playsInline
               className="absolute inset-0 w-full h-full object-cover rounded-2xl"
             />
-          )}
+          ) : null}
           <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-2xl">
             <Video className="h-8 w-8 text-[var(--accent)]" />
           </div>
         </>
-      ) : showNextImage ? (
+      ) : showNextImage && imageUrl ? (
         <Image
           src={imageUrl}
           alt=""
@@ -147,7 +150,7 @@ export function EntryCard({
           className="object-cover rounded-2xl"
           unoptimized
         />
-      ) : showImgFallback ? (
+      ) : showImgFallback && imageUrl ? (
         <img
           src={imageUrl}
           alt=""
