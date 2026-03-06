@@ -27,7 +27,7 @@ export function EntriesProvider({ children }: { children: React.ReactNode }) {
   }, [refresh]);
 
   const addEntry = useCallback(
-    (entry: Omit<DiaryEntry, "id" | "createdAt">) => {
+    (entry: Omit<DiaryEntry, "id"> & { createdAt?: string }) => {
       const newEntry = persistEntry(entry);
       setEntries(loadEntries());
       return newEntry;
@@ -36,7 +36,7 @@ export function EntriesProvider({ children }: { children: React.ReactNode }) {
   );
 
   const updateEntry = useCallback(
-    (entryId: string, updates: Omit<DiaryEntry, "id" | "createdAt">) => {
+    (entryId: string, updates: Partial<Omit<DiaryEntry, "id">>) => {
       const updated = persistUpdateEntry(entryId, updates);
       setEntries(loadEntries());
       return updated;

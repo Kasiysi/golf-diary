@@ -93,7 +93,7 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
         createdAt: entryDate ? new Date(entryDate + "T12:00:00").toISOString() : initialEntry.createdAt,
       });
     } else {
-      addEntry({ ...payload, createdAt: createdAtISO });
+      addEntry({ ...payload, createdAt: createdAtISO ?? new Date().toISOString() });
     }
 
     setClub("");
