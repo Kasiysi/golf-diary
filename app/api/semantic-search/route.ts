@@ -11,8 +11,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer, getServerUser, FALLBACK_USER_ID_FOR_DEV } from "@/lib/supabase/server";
 import { EMBEDDING_DIMENSION } from "@/lib/db/schema";
 
-// Gemini text-embedding-004 for query embeddings (must match embeddings used for existing DB entries)
-const EMBED_MODEL = "text-embedding-004";
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
 export interface SemanticSearchMatch {
@@ -34,14 +32,18 @@ export interface SemanticSearchResponse {
 
 /**
  * Get embedding vector from Google Generative AI (text-embedding-004).
- * Requests outputDimensionality 1536 to match existing Supabase vector columns.
+ * apiKey and model are passed in so env is read inside the request handler.
+ * outputDimensionality 1536 to match existing Supabase vector columns.
  */
-async function getEmbedding(text: string): Promise<number[] | null> {
-  const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY?.trim();
+async function getEmbedding(
+  text: string,
+  apiKey: string,
+  model: string = "text-embedding-004"
+): Promise<number[] | null> {
   if (!apiKey || !text.trim()) return null;
 
   const input = text.trim().slice(0, 8000);
-  const url = `${API_BASE}/models/${EMBED_MODEL}:embedContent?key=${encodeURIComponent(apiKey)}`;
+  const url = `${API_BASE}/models/${model}:embedContent?key=${encodeURIComponent(apiKey)}`;
 
   try {
     const res = await fetch(url, {
@@ -83,7 +85,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<SemanticS
       return NextResponse.json({ matches: [], source: "none" });
     }
 
-    const embedding = await getEmbedding(q);
+    // Read env inside the handler so process.env is fully loaded (e.g. in serverless)
+    const apiKey = typeof process.env.GOOGLE_GENERATIVE_AI_API_KEY === "string"
+      ? process.env.GOOGLE_GENERATIVE_AI_API_KEY.trim()
+      : "";
+    // Debug: log whether the key is detected (length only, never the key itself)
+    console.log(
+      "[semantic-search] Debug: GOOGLE_GENERATIVE_AI_API_KEY",
+      apiKey ? `set (length ${apiKey.length})` : "missing"
+    );
+
+    const model = "text-embedding-004";
+    const embedding = await getEmbedding(q, apiKey, model);
     if (!embedding) {
       return NextResponse.json({
         matches: [],
