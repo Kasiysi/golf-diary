@@ -232,6 +232,7 @@ export function EntryCard({
                 onClick={() => togglePriority(entry.id)}
                 className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
                 aria-label={entry.priority ? "Remove priority" : "Mark as priority"}
+                title={entry.priority ? "Poista prioriteetti" : "Merkitse prioriteetiksi (is_priority)"}
               >
                 <Star
                   className={cn(

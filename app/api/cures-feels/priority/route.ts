@@ -26,6 +26,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse<{ succes
     const instructionEnglish =
       typeof body.instruction_english === "string" ? body.instruction_english.trim() : null;
     const type = VALID_ENTRY_TYPES.includes(body.type) ? body.type : "feel";
+    const club = ["long-game", "short-game", "putting", "coach-advice"].includes(body.club) ? body.club : null;
 
     if (priority === undefined) {
       return NextResponse.json({ success: false, error: "priority (boolean) required" }, { status: 400 });
@@ -84,6 +85,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse<{ succes
         instruction_english: instructionEnglish,
         is_priority: true,
         suggested_video_url: suggestedVideoUrl ?? null,
+        club,
       };
       const { error: insertErr } = await supabase.from("cures_feels").insert(insertPayload as never);
       if (insertErr) {

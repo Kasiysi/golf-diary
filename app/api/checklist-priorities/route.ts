@@ -1,8 +1,8 @@
 /**
  * GET /api/checklist-priorities
  *
- * Returns Top 3 (or N) priority cures/feels for the Quick-Check Dashboard.
- * Reads from cures_feels (instruction, instruction_english). Only rows with is_priority = true.
+ * Returns Top 3 (or N) from cures_feels where is_priority = true, ordered by created_at desc.
+ * No separate Checklist table. Used by Quick-Check Dashboard.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -13,8 +13,8 @@ export interface ChecklistPriorityItem {
   content: string;
   contentEnglish: string | null;
   type: string;
+  club: string | null;
   createdAt: string;
-  /** AI Coach suggested YouTube URL (from cures_feels.suggested_video_url) */
   suggestedVideoUrl?: string | null;
 }
 
@@ -35,10 +35,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<ChecklistP
       return NextResponse.json({ items: [] });
     }
 
-    // cures_feels: instruction, instruction_english, suggested_video_url; only is_priority = true
     const { data, error } = await supabase
       .from("cures_feels")
-      .select("id, instruction, instruction_english, type, created_at, suggested_video_url")
+      .select("id, instruction, instruction_english, type, created_at, suggested_video_url, club")
       .eq("user_id", userId)
       .eq("is_priority", true)
       .order("created_at", { ascending: false })
@@ -55,6 +54,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ChecklistP
       type: string;
       created_at: string;
       suggested_video_url?: string | null;
+      club?: string | null;
     };
     const rows = (data ?? []) as CureRow[];
     const items: ChecklistPriorityItem[] = rows.map((row) => ({
@@ -62,6 +62,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ChecklistP
       content: row.instruction ?? "",
       contentEnglish: row.instruction_english ?? null,
       type: row.type,
+      club: row.club ?? null,
       createdAt: row.created_at,
       suggestedVideoUrl: row.suggested_video_url ?? null,
     }));

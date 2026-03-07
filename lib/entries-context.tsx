@@ -65,6 +65,7 @@ export function EntriesProvider({ children }: { children: React.ReactNode }) {
           instruction,
           instruction_english: entry?.searchSummaryEnglish ?? undefined,
           type: entry?.entryType ?? "feel",
+          club: entry?.club ?? undefined,
         }),
       }),
     })
