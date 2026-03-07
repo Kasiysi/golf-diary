@@ -47,6 +47,21 @@ export function EntriesProvider({ children }: { children: React.ReactNode }) {
   const togglePriority = useCallback((entryId: string) => {
     persistTogglePriority(entryId);
     setEntries(loadEntries());
+    const entries = loadEntries();
+    const entry = entries.find((e) => e.id === entryId);
+    const newPriority = entry?.priority ?? false;
+    fetch("/api/cures-feels/priority", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ entryId, priority: newPriority }),
+    })
+      .then((res) => res.json())
+      .then((data: { success?: boolean }) => {
+        if (data.success && typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("checklist-priorities-refresh"));
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const deleteEntry = useCallback((entryId: string) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ListChecks } from "lucide-react";
 
 export interface ChecklistPriorityItem {
@@ -16,28 +16,31 @@ export function QuickCheckDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const fetchPriorities = useCallback(() => {
     setLoading(true);
     setError(null);
-    // API returns cures_feels where is_priority = true (instruction / instruction_english)
     fetch("/api/checklist-priorities?limit=3")
       .then((res) => res.json())
       .then((data: { items?: ChecklistPriorityItem[]; error?: string }) => {
-        if (cancelled) return;
         if (data.error) setError(data.error);
         else setItems(Array.isArray(data.items) ? data.items : []);
       })
-      .catch((e) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchPriorities();
+    const onRefresh = () => {
+      if (!cancelled) fetchPriorities();
+    };
+    window.addEventListener("checklist-priorities-refresh", onRefresh);
     return () => {
       cancelled = true;
+      window.removeEventListener("checklist-priorities-refresh", onRefresh);
     };
-  }, []);
+  }, [fetchPriorities]);
 
   if (loading) {
     return (
