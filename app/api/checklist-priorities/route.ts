@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseServer, getServerUser } from "@/lib/supabase/server";
+import { getSupabaseServer, getServerUser, FALLBACK_USER_ID_FOR_DEV } from "@/lib/supabase/server";
 
 export interface ChecklistPriorityItem {
   id: string;
@@ -26,15 +26,17 @@ export async function GET(request: NextRequest): Promise<NextResponse<ChecklistP
     const limit = Math.min(10, Math.max(1, Number(request.nextUrl.searchParams.get("limit")) || 3));
     const supabase = getSupabaseServer();
     const user = await getServerUser();
+    // Temporary: use fallback user ID when not logged in so you can test on device
+    const userId = user?.id ?? FALLBACK_USER_ID_FOR_DEV;
 
-    if (!supabase || !user?.id) {
+    if (!supabase) {
       return NextResponse.json({ items: [] });
     }
 
     const { data, error } = await supabase
       .from("cures_feels")
       .select("id, content, content_english, type, created_at")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .eq("is_priority", true)
       .order("created_at", { ascending: false })
       .limit(limit);

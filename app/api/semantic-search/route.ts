@@ -1,18 +1,17 @@
 /**
  * POST /api/semantic-search
  *
- * Vector search: embed query (e.g. "putti ei kulje") and return linked Cures.
- * Uses Google Gemini text-embedding-004 for embeddings (GOOGLE_GENERATIVE_AI_API_KEY).
- * outputDimensionality 1536 to match Supabase vector columns.
- * Supabase RPC: match_cures_by_query + match_cures_direct.
+ * Vector search: embed query with Gemini text-embedding-004, then match via Supabase RPC.
+ * Uses GOOGLE_GENERATIVE_AI_API_KEY; model text-embedding-004 (same as Pro setup / existing DB entries).
+ * outputDimensionality 1536. When not logged in, uses FALLBACK_USER_ID_FOR_DEV for testing.
  * Body: { q: string, limit?: number }
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseServer, getServerUser } from "@/lib/supabase/server";
+import { getSupabaseServer, getServerUser, FALLBACK_USER_ID_FOR_DEV } from "@/lib/supabase/server";
 import { EMBEDDING_DIMENSION } from "@/lib/db/schema";
 
-// Gemini text-embedding-004 (use gemini-embedding-001 if 404 on your API)
+// Gemini text-embedding-004 for query embeddings (must match embeddings used for existing DB entries)
 const EMBED_MODEL = "text-embedding-004";
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
@@ -95,24 +94,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<SemanticS
     }
 
     const supabase = getSupabaseServer();
-    const user = await getServerUser();
-
     if (!supabase) {
       return NextResponse.json({
         matches: [],
         source: "none",
-        error: "Supabase not configured",
+        error:
+          "Supabase not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local (or SUPABASE_URL and SUPABASE_ANON_KEY).",
       });
     }
 
-    const userId = user?.id;
-    if (!userId) {
-      return NextResponse.json({
-        matches: [],
-        source: "none",
-        error: "Not authenticated",
-      });
-    }
+    const user = await getServerUser();
+    // Temporary: use fallback user ID when not logged in so you can test search on device
+    const userId = user?.id ?? FALLBACK_USER_ID_FOR_DEV;
 
     type LinkedRow = {
       cure_id: string;
