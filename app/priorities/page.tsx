@@ -6,6 +6,7 @@ import { useEntries } from "@/lib/entries-context";
 import { usePinnedPlan } from "@/lib/pinned-plan-context";
 import { EntryCard } from "@/components/entry-card";
 import { VideoPlayerModal } from "@/components/video-player-modal";
+import { QuickCheckDashboard } from "@/components/quick-check-dashboard";
 import { Star, PinOff } from "lucide-react";
 
 export default function PrioritiesPage() {
@@ -30,6 +31,7 @@ export default function PrioritiesPage() {
         </div>
       </header>
       <div className="p-4 md:p-6 space-y-4">
+        <QuickCheckDashboard />
         {pinnedPlan && (
           <motion.section
             initial={{ opacity: 0, y: 8 }}
