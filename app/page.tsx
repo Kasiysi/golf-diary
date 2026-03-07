@@ -2,14 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEntries } from "@/lib/entries-context";
 import { EntryCard } from "@/components/entry-card";
 import { VideoPlayerModal } from "@/components/video-player-modal";
-import { QuickCheckDashboard } from "@/components/quick-check-dashboard";
 import { CLUB_CATEGORIES } from "@/lib/constants";
-import { BookOpen, Search, Crosshair, Target, Circle, MessageCircle } from "lucide-react";
+import { BookOpen, Crosshair, Target, Circle, MessageCircle } from "lucide-react";
 
 const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   "long-game": Crosshair,
@@ -20,21 +18,13 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
 
 export default function DiaryPage() {
   const entries = useEntries();
-  const router = useRouter();
   const [videoModalUrl, setVideoModalUrl] = useState<string | null>(null);
-  const [searchQ, setSearchQ] = useState("");
 
   const categoryFilter = (slug: string) =>
     entries.filter((e) => e.club === slug);
   const chronologicalEntries = [...entries].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const q = searchQ.trim();
-    if (q) router.push(`/search?q=${encodeURIComponent(q)}`);
-  };
 
   return (
     <motion.div
@@ -49,26 +39,10 @@ export default function DiaryPage() {
             <BookOpen className="h-5 w-5 text-[var(--accent)]" />
             Diary
           </h1>
-          <form onSubmit={handleSearch} className="flex-1 flex max-w-md">
-            <div className="relative w-full">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
-              <input
-                type="search"
-                value={searchQ}
-                onChange={(e) => setSearchQ(e.target.value)}
-                placeholder="Search (FI/EN)…"
-                className="w-full rounded-xl border border-[var(--border)] bg-white py-2 pl-8 pr-3 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] shadow-[var(--shadow-sm)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)]"
-                aria-label="Search"
-              />
-            </div>
-          </form>
         </div>
       </header>
 
       <div className="p-4 md:p-6 space-y-6">
-        {/* Quick-Check Dashboard — Top 3 Pinned Cures */}
-        <QuickCheckDashboard />
-
         {/* High-contrast category buttons — easy to tap with gloves */}
         <section>
           <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-3">

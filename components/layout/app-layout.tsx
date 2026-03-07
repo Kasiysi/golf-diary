@@ -5,7 +5,6 @@ import { Sidebar } from "./sidebar";
 import { BottomNav } from "./bottom-nav";
 import { EntriesProvider } from "@/lib/entries-context";
 import { QuickAddProvider } from "@/lib/quick-add-context";
-import { PinnedPlanProvider } from "@/lib/pinned-plan-context";
 import { FundamentalsProvider } from "@/lib/fundamentals-context";
 
 function SidebarFallback() {
@@ -23,21 +22,19 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <EntriesProvider>
       <QuickAddProvider>
-        <PinnedPlanProvider>
-          <FundamentalsProvider>
-            <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-          <div className="flex min-h-screen">
-            <Suspense fallback={<SidebarFallback />}>
-              <Sidebar />
-            </Suspense>
-            <main className="flex-1 pb-20 md:pb-0 md:min-h-screen">
-              {children}
-            </main>
-          </div>
-          <BottomNav />
+        <FundamentalsProvider>
+          <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+            <div className="flex min-h-screen">
+              <Suspense fallback={<SidebarFallback />}>
+                <Sidebar />
+              </Suspense>
+              <main className="flex-1 pb-20 md:pb-0 md:min-h-screen">
+                {children}
+              </main>
             </div>
-          </FundamentalsProvider>
-        </PinnedPlanProvider>
+            <BottomNav />
+          </div>
+        </FundamentalsProvider>
       </QuickAddProvider>
     </EntriesProvider>
   );

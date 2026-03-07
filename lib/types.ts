@@ -39,10 +39,3 @@ export interface DiaryEntry {
   suggestedVideoUrl?: string | null;
   createdAt: string;
 }
-
-export interface PracticePlan {
-  coreFocus: string;
-  feelList: string[];
-  drillPlan: string[];
-  generatedAt: string;
-}

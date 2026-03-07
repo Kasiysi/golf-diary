@@ -3,15 +3,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEntries } from "@/lib/entries-context";
-import { usePinnedPlan } from "@/lib/pinned-plan-context";
 import { EntryCard } from "@/components/entry-card";
 import { VideoPlayerModal } from "@/components/video-player-modal";
-import { QuickCheckDashboard } from "@/components/quick-check-dashboard";
-import { Star, PinOff } from "lucide-react";
+import { Star } from "lucide-react";
 
 export default function PrioritiesPage() {
   const entries = useEntries();
-  const { pinnedPlan, setPinnedPlan } = usePinnedPlan();
   const [videoModalUrl, setVideoModalUrl] = useState<string | null>(null);
   const filtered = entries.filter((e) => e.priority === true);
 
@@ -31,57 +28,6 @@ export default function PrioritiesPage() {
         </div>
       </header>
       <div className="p-4 md:p-6 space-y-4">
-        <QuickCheckDashboard />
-        {pinnedPlan && (
-          <motion.section
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-[var(--border)] bg-white shadow-[var(--shadow)] overflow-hidden"
-          >
-            <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--border)]">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
-                Pinned Practice Plan
-              </span>
-              <button
-                type="button"
-                onClick={() => setPinnedPlan(null)}
-                className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-[var(--muted-foreground)] hover:bg-white/10 hover:text-[var(--foreground)]"
-                aria-label="Unpin practice plan"
-              >
-                <PinOff className="h-3.5 w-3.5" />
-                Unpin
-              </button>
-            </div>
-            <div className="p-4 space-y-4">
-              <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">
-                  Core Focus
-                </h3>
-                <p className="text-sm text-[var(--foreground)]">{pinnedPlan.coreFocus}</p>
-              </div>
-              <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">
-                  The Feel List
-                </h3>
-                <ul className="list-disc list-inside space-y-0.5 text-sm text-[var(--foreground)]">
-                  {pinnedPlan.feelList.map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-1">
-                  The Drill Plan
-                </h3>
-                <ol className="list-decimal list-inside space-y-1 text-sm text-[var(--foreground)]">
-                  {pinnedPlan.drillPlan.map((step, i) => (
-                    <li key={i}>{step}</li>
-                  ))}
-                </ol>
-              </div>
-            </div>
-          </motion.section>
-        )}
         <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
           Entries you&apos;ve marked as priority.
         </p>
