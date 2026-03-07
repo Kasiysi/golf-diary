@@ -1,9 +1,9 @@
 /**
  * POST /api/semantic-search
  *
- * Vector search: embed query with Gemini text-embedding-004, then match via Supabase RPC.
- * Uses GOOGLE_GENERATIVE_AI_API_KEY; model text-embedding-004 (same as Pro setup / existing DB entries).
- * outputDimensionality 1536. When not logged in, uses FALLBACK_USER_ID_FOR_DEV for testing.
+ * Vector search: embed query with Gemini text-embedding-004 (embedContent API), then match via Supabase RPC.
+ * Uses REST models/{model}:embedContent (same as model.embedContent(); @google/generative-ai has no embed API).
+ * GOOGLE_GENERATIVE_AI_API_KEY; outputDimensionality 1536. Errors from Gemini are returned in JSON for client (e.g. iPhone).
  * Body: { q: string, limit?: number }
  */
 
@@ -28,17 +28,22 @@ export interface SemanticSearchResponse {
   error?: string;
 }
 
+/** Result: either embedding vector or error message from Gemini (for client display). */
+type EmbeddingResult = { ok: true; values: number[] } | { ok: false; error: string };
+
 /**
- * Get embedding vector from Google Generative AI (text-embedding-004).
- * apiKey and model are passed in so env is read inside the request handler.
- * outputDimensionality 1536 to match existing Supabase vector columns.
+ * Get embedding via Gemini embedContent API (text-embedding-004).
+ * Uses REST :embedContent endpoint; apiKey read inside request handler.
+ * outputDimensionality 1536 to match Supabase vector columns.
  */
 async function getEmbedding(
   text: string,
   apiKey: string,
   model: string = "text-embedding-004"
-): Promise<number[] | null> {
-  if (!apiKey || !text.trim()) return null;
+): Promise<EmbeddingResult> {
+  if (!apiKey || !text.trim()) {
+    return { ok: false, error: "GOOGLE_GENERATIVE_AI_API_KEY is missing or empty." };
+  }
 
   const input = text.trim().slice(0, 8000);
   const apiBase = "https://generativelanguage.googleapis.com/v1beta";
@@ -56,21 +61,38 @@ async function getEmbedding(
       }),
     });
 
+    const rawBody = await res.text();
+
     if (!res.ok) {
-      const err = await res.text();
-      console.error("[semantic-search] Embed API error:", res.status, err);
-      return null;
+      let geminiMessage = rawBody;
+      try {
+        const parsed = JSON.parse(rawBody) as { error?: { message?: string; status?: string } };
+        geminiMessage = parsed?.error?.message ?? parsed?.error?.status ?? rawBody;
+      } catch {
+        // use rawBody as-is
+      }
+      console.error("[semantic-search] Gemini embedContent error:", res.status, geminiMessage);
+      return {
+        ok: false,
+        error: `Gemini embedding error (${res.status}): ${geminiMessage}`,
+      };
     }
 
-    const data = (await res.json()) as { embedding?: { values?: number[] } };
+    const data = JSON.parse(rawBody) as { embedding?: { values?: number[] } };
     const vec = data.embedding?.values;
     if (!vec || !Array.isArray(vec) || vec.length !== EMBEDDING_DIMENSION) {
-      return null;
+      const msg = "Invalid embedding response shape or dimension.";
+      console.error("[semantic-search]", msg, "length:", vec?.length);
+      return { ok: false, error: msg };
     }
-    return vec;
+    return { ok: true, values: vec };
   } catch (e) {
-    console.error("[semantic-search] getEmbedding failed:", e);
-    return null;
+    const err = e instanceof Error ? e : new Error(String(e));
+    console.error("Gemini error details:", err);
+    return {
+      ok: false,
+      error: `Embedding request failed: ${err.message}`,
+    };
   }
 }
 
@@ -94,21 +116,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<SemanticS
       return NextResponse.json({ matches: [], source: "none" });
     }
 
-    // All env read inside POST (no top-level init) so process.env is fully loaded in serverless
     const apiKey = typeof geminiKeyRaw === "string" ? geminiKeyRaw.trim() : "";
     const model = "text-embedding-004";
-    const embedding = await getEmbedding(q, apiKey, model);
+    const embedResult = await getEmbedding(q, apiKey, model);
 
-    if (!embedding) {
-      const envHelp = Object.entries(envSnapshot)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join("; ");
+    if (!embedResult.ok) {
       return NextResponse.json({
         matches: [],
         source: "none",
-        error: `Embedding not available. Check env in Vercel: ${envHelp}. Set GOOGLE_GENERATIVE_AI_API_KEY in Project Settings → Environment Variables and redeploy.`,
+        error: embedResult.error,
       });
     }
+    const embedding = embedResult.values;
 
     const supabase = getSupabaseServer();
     if (!supabase) {
@@ -189,7 +208,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<SemanticS
 
     return NextResponse.json({ matches, source: "linked" });
   } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ matches: [], source: "none", error: message }, { status: 500 });
+    const err = e instanceof Error ? e : new Error(String(e));
+    console.error("Gemini error details:", err);
+    return NextResponse.json(
+      { matches: [], source: "none", error: err.message },
+      { status: 500 }
+    );
   }
 }
