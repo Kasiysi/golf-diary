@@ -64,7 +64,7 @@ export function QuickCheckDashboard() {
           Quick-Check (Top 3)
         </div>
         <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-          {error ?? "No priorities set. Mark cures as priority in Manage Checklist to see them here."}
+          {error ?? "No priorities set. Star an entry to pin it here."}
         </p>
       </div>
     );

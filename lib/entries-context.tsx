@@ -50,6 +50,8 @@ export function EntriesProvider({ children }: { children: React.ReactNode }) {
     const entries = loadEntries();
     const entry = entries.find((e) => e.id === entryId);
     const newPriority = entry?.priority ?? false;
+    const instruction =
+      entry?.cure ?? entry?.notes ?? entry?.problemNotes ?? "";
     fetch("/api/cures-feels/priority", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -57,6 +59,11 @@ export function EntriesProvider({ children }: { children: React.ReactNode }) {
         entryId,
         priority: newPriority,
         ...(entry?.suggestedVideoUrl && { suggestedVideoUrl: entry.suggestedVideoUrl }),
+        ...(newPriority && {
+          instruction,
+          instruction_english: entry?.searchSummaryEnglish ?? undefined,
+          type: entry?.entryType ?? "feel",
+        }),
       }),
     })
       .then((res) => res.json())

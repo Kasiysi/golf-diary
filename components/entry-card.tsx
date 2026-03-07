@@ -93,8 +93,9 @@ export function EntryCard({
   const hasImage = entry.media.some((m) => m.type === "image");
   const firstMedia = entry.media[0];
 
-  // All categories: show YouTube if link is in any text field or youtubeLink (include English fields so no category is missed)
+  // YouTube: same for Long Game, Short Game, Putting, Coach's Advice — no category filter. Check instruction, content, and all text fields.
   const textForYoutube = [
+    entry.youtubeLink,
     entry.notes,
     entry.problemNotes,
     entry.cure,
@@ -105,9 +106,7 @@ export function EntryCard({
   ]
     .filter(Boolean)
     .join(" ");
-  const youtubeId =
-    (entry.youtubeLink && getYouTubeVideoId(entry.youtubeLink)) ||
-    getYouTubeVideoId(textForYoutube);
+  const youtubeId = getYouTubeVideoId(textForYoutube);
 
   // Main text: prefer instruction/content when present (DB columns), else notes/problemNotes
   const mainText =
@@ -274,7 +273,7 @@ export function EntryCard({
               </p>
             </div>
           )}
-          {/* YouTube embed: same for all categories; always below text when link is in notes, problemNotes, cure, instruction or content */}
+          {/* YouTube embed: all categories (Long Game, Short Game, Putting, Coach's Advice); link from instruction, content, notes, cure, youtubeLink */}
           {youtubeId && (
             <div className="mt-2 rounded-lg overflow-hidden aspect-video max-w-full bg-black">
               <iframe
