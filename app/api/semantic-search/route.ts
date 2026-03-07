@@ -1,17 +1,20 @@
 /**
  * POST /api/semantic-search
  *
- * Vector search: embed query (e.g. "Draiveri slaissaa tänään") and return linked Cures (e.g. "Stronger Grip").
- * Uses Supabase RPC match_cures_by_query + match_cures_direct when Supabase and OpenAI are configured.
+ * Vector search: embed query (e.g. "putti ei kulje") and return linked Cures.
+ * Uses Google Gemini embedding model for embeddings (GOOGLE_GENERATIVE_AI_API_KEY).
+ * Model: gemini-embedding-001 with outputDimensionality 1536.
+ * Supabase RPC: match_cures_by_query + match_cures_direct.
  * Body: { q: string, limit?: number }
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 import { getSupabaseServer, getServerUser } from "@/lib/supabase/server";
 import { EMBEDDING_DIMENSION } from "@/lib/db/schema";
 
-const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
+// Use gemini-embedding-001 (text-embedding-004 not available on Google AI Studio; this model supports outputDimensionality 1536)
+const EMBED_MODEL = "gemini-embedding-001";
+const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
 export interface SemanticSearchMatch {
   cureId: string;
@@ -30,15 +33,45 @@ export interface SemanticSearchResponse {
   error?: string;
 }
 
+/**
+ * Get embedding vector from Google Generative AI (text-embedding-004).
+ * Requests outputDimensionality 1536 to match existing Supabase vector columns.
+ */
 async function getEmbedding(text: string): Promise<number[] | null> {
-  if (!openai || !text.trim()) return null;
-  const resp = await openai.embeddings.create({
-    model: "text-embedding-3-small",
-    input: text.trim().slice(0, 8000),
-  });
-  const vec = resp.data?.[0]?.embedding;
-  if (!vec || vec.length !== EMBEDDING_DIMENSION) return null;
-  return vec;
+  const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY?.trim();
+  if (!apiKey || !text.trim()) return null;
+
+  const input = text.trim().slice(0, 8000);
+  const url = `${API_BASE}/models/${EMBED_MODEL}:embedContent?key=${encodeURIComponent(apiKey)}`;
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        content: {
+          parts: [{ text: input }],
+        },
+        outputDimensionality: EMBEDDING_DIMENSION,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("[semantic-search] Embed API error:", res.status, err);
+      return null;
+    }
+
+    const data = (await res.json()) as { embedding?: { values?: number[] } };
+    const vec = data.embedding?.values;
+    if (!vec || !Array.isArray(vec) || vec.length !== EMBEDDING_DIMENSION) {
+      return null;
+    }
+    return vec;
+  } catch (e) {
+    console.error("[semantic-search] getEmbedding failed:", e);
+    return null;
+  }
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse<SemanticSearchResponse>> {
@@ -56,7 +89,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<SemanticS
       return NextResponse.json({
         matches: [],
         source: "none",
-        error: "Embedding not available (missing OPENAI_API_KEY or invalid response)",
+        error:
+          "Embedding not available (missing GOOGLE_GENERATIVE_AI_API_KEY or invalid response from embedding API)",
       });
     }
 

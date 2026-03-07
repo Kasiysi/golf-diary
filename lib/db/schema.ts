@@ -98,5 +98,5 @@ export interface FaultCureLinkRow {
 export type FaultCureLinkInsert = Omit<FaultCureLinkRow, "id" | "linked_at"> &
   Partial<Pick<FaultCureLinkRow, "linked_at">> & { id?: string };
 
-/** Vector embedding dimension (must match migration: 1536 for OpenAI) */
+/** Vector embedding dimension (must match migration: 1536; used with Gemini embedding API outputDimensionality) */
 export const EMBEDDING_DIMENSION = 1536;
