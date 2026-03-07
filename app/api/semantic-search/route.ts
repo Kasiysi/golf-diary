@@ -2,8 +2,8 @@
  * POST /api/semantic-search
  *
  * Vector search: embed query (e.g. "putti ei kulje") and return linked Cures.
- * Uses Google Gemini embedding model for embeddings (GOOGLE_GENERATIVE_AI_API_KEY).
- * Model: gemini-embedding-001 with outputDimensionality 1536.
+ * Uses Google Gemini text-embedding-004 for embeddings (GOOGLE_GENERATIVE_AI_API_KEY).
+ * outputDimensionality 1536 to match Supabase vector columns.
  * Supabase RPC: match_cures_by_query + match_cures_direct.
  * Body: { q: string, limit?: number }
  */
@@ -12,8 +12,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer, getServerUser } from "@/lib/supabase/server";
 import { EMBEDDING_DIMENSION } from "@/lib/db/schema";
 
-// Use gemini-embedding-001 (text-embedding-004 not available on Google AI Studio; this model supports outputDimensionality 1536)
-const EMBED_MODEL = "gemini-embedding-001";
+// Gemini text-embedding-004 (use gemini-embedding-001 if 404 on your API)
+const EMBED_MODEL = "text-embedding-004";
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
 export interface SemanticSearchMatch {
