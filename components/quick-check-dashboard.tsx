@@ -26,8 +26,8 @@ function categoryLabel(club: string | null): string {
 }
 
 /**
- * Quick-Check (Top 3): fetches directly from cures_feels where is_priority = true.
- * No separate Checklist table. Refreshes on event and visibility.
+ * Quick-Check (Top 3): fetches from cures_feels table, is_priority = true only.
+ * Data from /api/checklist-priorities (Supabase: cures_feels, is_priority column). No separate Checklist table.
  */
 export function QuickCheckDashboard() {
   const [items, setItems] = useState<ChecklistPriorityItem[]>([]);

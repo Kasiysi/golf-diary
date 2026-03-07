@@ -49,10 +49,11 @@ export async function PATCH(request: NextRequest): Promise<NextResponse<{ succes
     const updatePayload: { is_priority: boolean; suggested_video_url?: string } = { is_priority: priority };
     if (suggestedVideoUrl !== undefined) updatePayload.suggested_video_url = suggestedVideoUrl;
 
+    // Type cast required for build: Supabase infers update/insert as never; payload matches cures_feels
     if (cureId) {
       const { error: err } = await supabase
         .from("cures_feels")
-        .update(updatePayload as never)
+        .update(updatePayload as unknown as never)
         .eq("id", cureId)
         .eq("user_id", userId);
       if (err) {
@@ -65,7 +66,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse<{ succes
     // Update by entry_id
     const { data: updated, error: updateErr } = await supabase
       .from("cures_feels")
-      .update(updatePayload as never)
+      .update(updatePayload as unknown as never)
       .eq("entry_id", entryId!)
       .eq("user_id", userId)
       .select("id");
@@ -87,7 +88,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse<{ succes
         suggested_video_url: suggestedVideoUrl ?? null,
         club,
       };
-      const { error: insertErr } = await supabase.from("cures_feels").insert(insertPayload as never);
+      const { error: insertErr } = await supabase.from("cures_feels").insert(insertPayload as unknown as never);
       if (insertErr) {
         console.error("[cures-feels/priority] insert", insertErr);
         return NextResponse.json({ success: false, error: insertErr.message ?? "Insert failed" }, { status: 500 });

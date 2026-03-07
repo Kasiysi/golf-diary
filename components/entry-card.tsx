@@ -106,6 +106,7 @@ export function EntryCard({
   ]
     .filter(Boolean)
     .join(" ");
+  // watch, Shorts (/shorts/), youtu.be → same video ID; embed URL is always /embed/ID (works in all categories including Short Game)
   const youtubeId = getYouTubeVideoId(textForYoutube);
 
   // Main text: prefer instruction/content when present (DB columns), else notes/problemNotes

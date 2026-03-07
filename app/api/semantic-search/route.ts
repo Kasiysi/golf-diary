@@ -98,15 +98,10 @@ async function getEmbedding(
 
 export async function POST(request: NextRequest): Promise<NextResponse<SemanticSearchResponse>> {
   try {
-    // Log env at the very start so Vercel logs show what's visible (no secret values)
+    // Initialize env only inside POST so process.env is loaded in serverless
     const geminiKeyRaw = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-    console.log("Gemini Key length:", geminiKeyRaw?.length ?? "undefined");
-    const envSnapshot: Record<string, string> = {
-      GOOGLE_GENERATIVE_AI_API_KEY: geminiKeyRaw ? `set (length ${geminiKeyRaw.length})` : "missing",
-      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? "set" : "missing",
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "set" : "missing",
-    };
-    console.log("[semantic-search] Env snapshot:", JSON.stringify(envSnapshot));
+    const apiKey = typeof geminiKeyRaw === "string" ? geminiKeyRaw.trim() : "";
+    const model = "text-embedding-004";
 
     const body = await request.json().catch(() => ({}));
     const q = typeof body.q === "string" ? body.q.trim() : "";
@@ -116,8 +111,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SemanticS
       return NextResponse.json({ matches: [], source: "none" });
     }
 
-    const apiKey = typeof geminiKeyRaw === "string" ? geminiKeyRaw.trim() : "";
-    const model = "text-embedding-004";
+    // embedContent(query) via REST (text-embedding-004); SDK has no embed API
     const embedResult = await getEmbedding(q, apiKey, model);
 
     if (!embedResult.ok) {
