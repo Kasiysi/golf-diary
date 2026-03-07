@@ -1,10 +1,10 @@
 /**
  * PATCH /api/cures-feels/priority
  *
- * Updates is_priority (and optionally suggested_video_url) in cures_feels for the given entry_id (or cure_id).
- * Body: { entryId?, cureId?, priority, suggestedVideoUrl?, instruction?, instruction_english?, type? }
- * When updating by entry_id and no row exists, inserts a row so the dashboard can show it (no separate Checklist table).
- * At least one of entryId or cureId required. Uses Supabase + FALLBACK_USER_ID_FOR_DEV when not logged in.
+ * Updates is_priority, suggested_video_url in cures_feels. Reads user_id from getServerUser() or FALLBACK_USER_ID_FOR_DEV.
+ * On insert (when no row for entry_id), saves: user_id, type, instruction, instruction_english, is_priority, suggested_video_url, club.
+ * Body: { entryId?, cureId?, priority, suggestedVideoUrl?, instruction?, instruction_english?, type?, club? }
+ * At least one of entryId or cureId required. Uses .update(updatePayload as any) for Vercel build.
  */
 
 import { NextRequest, NextResponse } from "next/server";

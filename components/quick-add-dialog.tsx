@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,7 @@ type Props = {
 };
 
 export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
+  const router = useRouter();
   const addEntry = useAddEntry();
   const updateEntry = useUpdateEntry();
   const [club, setClub] = useState<ClubCategory | "">("");
@@ -76,66 +78,71 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
 
     setSubmitting(true);
     try {
-    const combinedNote =
-      isProblemType
-        ? [problemNotes.trim(), cure.trim()].filter(Boolean).join(" ")
-        : notes.trim();
-    let searchSummaryEnglish: string | null = null;
-    let suggestedVideoUrl: string | null = null;
-    if (combinedNote) {
-      try {
-        const res = await fetch("/api/analyze-session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ notes: combinedNote }),
-        });
-        const data = await res.json();
-        if (data?.notesResult) {
-          if (data.notesResult.summaryEnglish) searchSummaryEnglish = data.notesResult.summaryEnglish;
-          if (data.notesResult.suggestedVideoUrl) suggestedVideoUrl = data.notesResult.suggestedVideoUrl;
+      const combinedNote =
+        isProblemType
+          ? [problemNotes.trim(), cure.trim()].filter(Boolean).join(" ")
+          : notes.trim();
+      let searchSummaryEnglish: string | null = null;
+      let suggestedVideoUrl: string | null = null;
+      if (combinedNote) {
+        try {
+          const res = await fetch("/api/analyze-session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ notes: combinedNote }),
+          });
+          const data = await res.json();
+          if (data?.notesResult) {
+            if (data.notesResult.summaryEnglish) searchSummaryEnglish = data.notesResult.summaryEnglish;
+            if (data.notesResult.suggestedVideoUrl) suggestedVideoUrl = data.notesResult.suggestedVideoUrl;
+          }
+        } catch {
+          // proceed without AI result
         }
-      } catch {
-        // proceed without AI result
       }
-    }
 
-    const createdAtISO = entryDate ? new Date(entryDate + "T12:00:00").toISOString() : undefined;
-    const payload = {
-      club,
-      swingPhase: swingPhase === "none" ? undefined : swingPhase,
-      entryType,
-      notes: isProblemType ? "" : notes.trim(),
-      problemNotes: isProblemType ? problemNotes.trim() : undefined,
-      cure: isProblemType ? cure.trim() : undefined,
-      youtubeLink: youtubeLink.trim() || undefined,
-      media: uploadedMedia,
-      ...(searchSummaryEnglish != null && { searchSummaryEnglish }),
-      ...((suggestedVideoUrl ?? (isEditing && initialEntry?.suggestedVideoUrl)) != null && {
-        suggestedVideoUrl: suggestedVideoUrl ?? initialEntry!.suggestedVideoUrl ?? null,
-      }),
-      ...(createdAtISO && { createdAt: createdAtISO }),
-      ...(isEditing && initialEntry && { priority: initialEntry.priority }),
-    };
+      const createdAtISO = entryDate ? new Date(entryDate + "T12:00:00").toISOString() : undefined;
+      const payload = {
+        club,
+        swingPhase: swingPhase === "none" ? undefined : swingPhase,
+        entryType,
+        notes: isProblemType ? "" : notes.trim(),
+        problemNotes: isProblemType ? problemNotes.trim() : undefined,
+        cure: isProblemType ? cure.trim() : undefined,
+        youtubeLink: youtubeLink.trim() || undefined,
+        media: uploadedMedia,
+        ...(searchSummaryEnglish != null && { searchSummaryEnglish }),
+        ...((suggestedVideoUrl ?? (isEditing && initialEntry?.suggestedVideoUrl)) != null && {
+          suggestedVideoUrl: suggestedVideoUrl ?? initialEntry!.suggestedVideoUrl ?? null,
+        }),
+        ...(createdAtISO && { createdAt: createdAtISO }),
+        ...(isEditing && initialEntry && { priority: initialEntry.priority }),
+      };
 
-    if (isEditing && initialEntry) {
-      updateEntry(initialEntry.id, {
-        ...payload,
-        createdAt: entryDate ? new Date(entryDate + "T12:00:00").toISOString() : initialEntry.createdAt,
-      });
-    } else {
-      addEntry({ ...payload, createdAt: createdAtISO ?? new Date().toISOString() });
-    }
+      if (isEditing && initialEntry) {
+        updateEntry(initialEntry.id, {
+          ...payload,
+          createdAt: entryDate ? new Date(entryDate + "T12:00:00").toISOString() : initialEntry.createdAt,
+        });
+      } else {
+        addEntry({ ...payload, createdAt: createdAtISO ?? new Date().toISOString() });
+      }
 
-    setClub("");
-    setSwingPhase("none");
-    setEntryType("");
-    setNotes("");
-    setProblemNotes("");
-    setCure("");
-    setYoutubeLink("");
-    setUploadedMedia([]);
-    setEntryDate("");
-    onOpenChange(false);
+      setClub("");
+      setSwingPhase("none");
+      setEntryType("");
+      setNotes("");
+      setProblemNotes("");
+      setCure("");
+      setYoutubeLink("");
+      setUploadedMedia([]);
+      setEntryDate("");
+      onOpenChange(false);
+      router.push("/diary");
+      router.refresh();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (typeof window !== "undefined") alert(message);
     } finally {
       setSubmitting(false);
     }
