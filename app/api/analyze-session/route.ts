@@ -1,17 +1,31 @@
 /**
  * POST /api/analyze-session
  *
- * Multi-modal AI: vision OCR (club path, face angle, launch direction) + voice (Whisper + optional Finnish → English search optimization).
- * Body: { imageUrls?: string[], voiceAudioUrl?: string } or formData with files.
- * Requires OPENAI_API_KEY. Optional: NEXT_PUBLIC_SUPABASE_URL for storage URLs.
+ * Uses Google Gemini 1.5 Flash for:
+ * - Vision: OCR of launch monitor screens (Trackman, GCQuad) → club_path, face_angle, launch_direction
+ * - Text: If input is Finnish, generates search_summary_english and tags for the database
+ *
+ * Body: { imageUrls?: string[], voiceAudioUrl?: string, notes?: string }
+ * Requires GOOGLE_GENERATIVE_AI_API_KEY.
+ * Categories: Long Game, Short Game, Putting, Coach's Advice.
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
+const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY ?? "";
+const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+const MODEL = "gemini-1.5-flash";
 
-const VISION_MODEL = "gpt-4o-mini";
+/** Heuristic: likely Finnish if contains Finnish chars or common words */
+function isLikelyFinnish(text: string): boolean {
+  const t = text.trim();
+  if (!t || t.length < 3) return false;
+  if (/[\u00C0-\u024F\u1E00-\u1EFF]/.test(t)) return true;
+  if (/\b(ja|ei|on|oli|olla|että|kun|miten|putti|lyönti|greeni|bunkkeri)\b/i.test(t)) return true;
+  if (t.split(/\s/).some((w) => w.length > 12)) return true;
+  return false;
+}
 
 export interface AnalyzeSessionImageResult {
   imageUrl: string;
@@ -32,39 +46,64 @@ export interface AnalyzeSessionVoiceResult {
   error?: string;
 }
 
-export interface AnalyzeSessionResponse {
-  imageResults?: AnalyzeSessionImageResult[];
-  voiceResult?: AnalyzeSessionVoiceResult;
+export interface AnalyzeSessionNotesResult {
+  summaryEnglish: string;
+  tags?: string[];
   error?: string;
 }
 
-async function analyzeImageWithVision(imageUrl: string): Promise<AnalyzeSessionImageResult> {
-  if (!openai) {
-    return { imageUrl, error: "OpenAI not configured" };
+export interface AnalyzeSessionResponse {
+  imageResults?: AnalyzeSessionImageResult[];
+  voiceResult?: AnalyzeSessionVoiceResult;
+  notesResult?: AnalyzeSessionNotesResult;
+  error?: string;
+}
+
+/** Fetch image from URL and return as base64 + mimeType */
+async function fetchImageAsBase64(imageUrl: string): Promise<{ data: string; mimeType: string } | null> {
+  try {
+    const res = await fetch(imageUrl);
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    const buf = Buffer.from(await blob.arrayBuffer());
+    const base64 = buf.toString("base64");
+    const mimeType = blob.type || "image/jpeg";
+    return { data: base64, mimeType: mimeType.split(";")[0].trim() || "image/jpeg" };
+  } catch {
+    return null;
+  }
+}
+
+/** Gemini vision: OCR launch monitor screens (Trackman, GCQuad) for club path and face angle */
+async function analyzeImageWithGemini(imageUrl: string): Promise<AnalyzeSessionImageResult> {
+  if (!genAI) {
+    return { imageUrl, error: "Gemini not configured (missing GOOGLE_GENERATIVE_AI_API_KEY)" };
   }
   try {
-    const resp = await openai.chat.completions.create({
-      model: VISION_MODEL,
-      max_tokens: 300,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: `You are a golf swing analyst. Look at this golf swing image (e.g. club path, face, launch).
-Return ONLY a JSON object with these keys (use null if unclear):
-- club_path: string (e.g. "in-to-out", "out-to-in", "neutral")
-- face_angle: string (e.g. "open", "closed", "square")
-- launch_direction: string (e.g. "left", "right", "straight")
-No other text.`,
-            },
-            { type: "image_url", image_url: { url: imageUrl } },
-          ],
+    const imageData = await fetchImageAsBase64(imageUrl);
+    if (!imageData) {
+      return { imageUrl, error: "Could not fetch or encode image" };
+    }
+
+    const model = genAI.getGenerativeModel({ model: MODEL });
+    const prompt = `You are analyzing a photo of a golf launch monitor screen (e.g. Trackman, GCQuad, Foresight).
+Read any visible numbers and labels. Extract and return ONLY a JSON object with these keys (use null if not visible or unclear):
+- club_path: string (e.g. "in-to-out", "out-to-in", "neutral", "inside-out", "outside-in")
+- face_angle: string (e.g. "open", "closed", "square", or degrees if shown)
+- launch_direction: string (e.g. "left", "right", "straight", or exact value from screen)
+No other text, no markdown, just the JSON object.`;
+
+    const result = await model.generateContent([
+      { text: prompt },
+      {
+        inlineData: {
+          mimeType: imageData.mimeType,
+          data: imageData.data,
         },
-      ],
-    });
-    const raw = resp.choices[0]?.message?.content?.trim() ?? "";
+      },
+    ]);
+
+    const raw = result.response.text?.()?.trim() ?? "";
     let club_path: string | undefined;
     let face_angle: string | undefined;
     let launch_direction: string | undefined;
@@ -83,68 +122,52 @@ No other text.`,
   }
 }
 
-async function transcribeAndOptimizeForSearch(audioUrl: string): Promise<AnalyzeSessionVoiceResult> {
-  if (!openai) {
-    return { transcript: "", language: "en", error: "OpenAI not configured" };
+/** Gemini text: Finnish → search_summary_english and tags for DB */
+async function optimizeNotesForSearch(notes: string): Promise<AnalyzeSessionNotesResult> {
+  if (!genAI || !notes.trim()) {
+    return { summaryEnglish: "", error: "Gemini not configured or empty notes" };
+  }
+  if (!isLikelyFinnish(notes)) {
+    return { summaryEnglish: "" };
   }
   try {
-    const audioResponse = await fetch(audioUrl);
-    if (!audioResponse.ok) {
-      return { transcript: "", language: "en", error: `Failed to fetch audio: ${audioResponse.status}` };
-    }
-    const blob = await audioResponse.blob();
-    const file = new File([blob], "voice.mp3", { type: blob.type || "audio/mpeg" });
-
-    const transcription = await openai.audio.transcriptions.create({
-      file,
-      model: "whisper-1",
-      response_format: "verbose_json",
-      language: undefined,
-    });
-
-    const transcript = (transcription as { text?: string }).text ?? "";
-    const language = (transcription as { language?: string }).language ?? "en";
-
-    let searchOptimization: AnalyzeSessionVoiceResult["searchOptimization"] | undefined;
-    const isLikelyFinnish = language === "fi" || /[\u00C0-\u024F\u1E00-\u1EFF]/.test(transcript) || transcript.split(/\s/).some((w) => w.length > 10);
-    if (transcript && (isLikelyFinnish || language === "fi")) {
-      const comp = await openai.chat.completions.create({
-        model: VISION_MODEL,
-        max_tokens: 200,
-        messages: [
-          {
-            role: "user",
-            content: `The following is a Finnish golf practice note (transcription). Produce a "Search Optimization" block so we can find this note using English semantic search.
+    const model = genAI.getGenerativeModel({ model: MODEL });
+    const prompt = `The following is a Finnish golf practice note. Produce a short English summary and tags for database search.
 Return ONLY valid JSON with two keys:
-- summaryEnglish: string (2-3 sentence summary in English)
-- tags: string[] (short English tags, e.g. ["driver", "slice", "grip"])
-Transcription:\n${transcript}`,
-          },
-        ],
-      });
-      const text = comp.choices[0]?.message?.content?.trim() ?? "";
-      try {
-        const parsed = JSON.parse(text.replace(/^```json?\s*|\s*```$/g, "")) as { summaryEnglish?: string; tags?: string[] };
-        if (parsed.summaryEnglish) {
-          searchOptimization = {
-            summaryEnglish: parsed.summaryEnglish,
-            tags: Array.isArray(parsed.tags) ? parsed.tags : [],
-          };
-        }
-      } catch {
-        if (text) searchOptimization = { summaryEnglish: text, tags: [] };
-      }
-    }
+- summaryEnglish: string (2-3 sentence summary in English, for search_summary_english column)
+- tags: string[] (short English tags, e.g. ["putting", "alignment", "grip"])
+Note:\n${notes.trim().slice(0, 2000)}`;
 
-    return {
-      transcript,
-      language,
-      searchOptimization,
-    };
+    const result = await model.generateContent(prompt);
+    const text = result.response.text?.()?.trim() ?? "";
+    try {
+      const parsed = JSON.parse(text.replace(/^```json?\s*|\s*```$/g, "")) as {
+        summaryEnglish?: string;
+        tags?: string[];
+      };
+      return {
+        summaryEnglish: parsed.summaryEnglish ?? "",
+        tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+      };
+    } catch {
+      if (text) return { summaryEnglish: text, tags: [] };
+    }
+    return { summaryEnglish: "" };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    return { transcript: "", language: "en", error: message };
+    return { summaryEnglish: "", error: message };
   }
+}
+
+/** Voice: optional path – if voiceAudioUrl provided, we could use Gemini audio later; for now skip or keep minimal */
+async function transcribeAndOptimizeForSearch(audioUrl: string): Promise<AnalyzeSessionVoiceResult> {
+  // Gemini 1.5 Flash can process audio; for now return a placeholder so the API shape is unchanged.
+  // To implement: fetch audio, send as inlineData with mimeType audio/*, ask for transcript + summary/tags if Finnish.
+  return {
+    transcript: "",
+    language: "en",
+    error: "Voice input: use notes field for text; audio not yet implemented with Gemini",
+  };
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse<AnalyzeSessionResponse>> {
@@ -152,22 +175,26 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalyzeSe
     const contentType = request.headers.get("content-type") ?? "";
     let imageUrls: string[] = [];
     let voiceAudioUrl: string | undefined;
+    let notesText = "";
 
     if (contentType.includes("application/json")) {
       const body = await request.json();
       imageUrls = Array.isArray(body.imageUrls) ? body.imageUrls : [];
       voiceAudioUrl = typeof body.voiceAudioUrl === "string" ? body.voiceAudioUrl : undefined;
+      notesText = typeof body.notes === "string" ? body.notes.trim() : "";
     } else if (contentType.includes("multipart/form-data")) {
       const form = await request.formData();
       const urls = form.get("imageUrls");
       if (typeof urls === "string") imageUrls = urls ? [urls] : [];
       else if (Array.isArray(urls)) imageUrls = urls.filter((u): u is string => typeof u === "string");
       voiceAudioUrl = typeof form.get("voiceAudioUrl") === "string" ? (form.get("voiceAudioUrl") as string) : undefined;
+      const n = form.get("notes");
+      notesText = typeof n === "string" ? n.trim() : "";
     }
 
     const imageResults: AnalyzeSessionImageResult[] = [];
     for (const url of imageUrls.slice(0, 5)) {
-      const result = await analyzeImageWithVision(url);
+      const result = await analyzeImageWithGemini(url);
       imageResults.push(result);
     }
 
@@ -176,9 +203,16 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalyzeSe
       voiceResult = await transcribeAndOptimizeForSearch(voiceAudioUrl);
     }
 
+    let notesResult: AnalyzeSessionNotesResult | undefined;
+    if (notesText) {
+      const res = await optimizeNotesForSearch(notesText);
+      if (res.summaryEnglish) notesResult = res;
+    }
+
     return NextResponse.json({
       ...(imageResults.length > 0 && { imageResults }),
       ...(voiceResult && { voiceResult }),
+      ...(notesResult && { notesResult }),
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

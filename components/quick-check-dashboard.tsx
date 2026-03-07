@@ -69,7 +69,7 @@ export function QuickCheckDashboard() {
       <div className="flex items-center gap-2 px-4 py-2 border-b border-white/10">
         <ListChecks className="h-4 w-4 text-[var(--accent)]" />
         <span className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
-          Quick-Check — Top 3 Priorities
+          Quick-Check — Top 3 Pinned Cures
         </span>
       </div>
       <ul className="divide-y divide-white/10">

@@ -1,19 +1,15 @@
 /**
  * Database schema types for Supabase (Fault-Cure Relational Model).
- * Matches supabase/migrations/20250306120000_fault_cure_relational_schema.sql
+ * Matches supabase/migrations (simplified 4 categories: long_game, short_game, putting, coach_advice).
  *
  * Use with your existing auth and Supabase client; these types describe table rows.
  */
 
 export type ClubCategory =
-  | "driver"
-  | "woods"
-  | "long-irons"
-  | "short-irons"
-  | "wedges"
-  | "putter"
-  | "setup"
-  | "anything";
+  | "long_game"
+  | "short_game"
+  | "putting"
+  | "coach_advice";
 
 export type SwingPhase = "none" | "setup" | "backswing" | "downswing";
 

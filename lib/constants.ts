@@ -1,14 +1,11 @@
 import type { ClubCategory, EntryType, SwingPhase } from "./types";
 
+/** Four primary categories: lean UI, easy to tap with gloves */
 export const CLUB_CATEGORIES: { value: ClubCategory; label: string }[] = [
-  { value: "driver", label: "Driver" },
-  { value: "woods", label: "Woods" },
-  { value: "long-irons", label: "Long Irons" },
-  { value: "short-irons", label: "Short Irons" },
-  { value: "wedges", label: "Wedges" },
-  { value: "putter", label: "Putter" },
-  { value: "setup", label: "Setup" },
-  { value: "anything", label: "Anything" },
+  { value: "long-game", label: "Long Game" },
+  { value: "short-game", label: "Short Game" },
+  { value: "putting", label: "Putting" },
+  { value: "coach-advice", label: "Coach's Advice" },
 ];
 
 export const SWING_PHASES: { value: SwingPhase; label: string }[] = [

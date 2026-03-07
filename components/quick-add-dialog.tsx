@@ -41,6 +41,7 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
   const [youtubeLink, setYoutubeLink] = useState("");
   const [uploadedMedia, setUploadedMedia] = useState<MediaItem[]>([]);
   const [entryDate, setEntryDate] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const isEditing = Boolean(initialEntry?.id);
   const isProblemType = entryType === "problem";
@@ -69,9 +70,32 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
     }
   }, [open, initialEntry]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmitWithAiSummary = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!club || !entryType) return;
+    if (!club || !entryType || submitting) return;
+
+    setSubmitting(true);
+    try {
+    const combinedNote =
+      isProblemType
+        ? [problemNotes.trim(), cure.trim()].filter(Boolean).join(" ")
+        : notes.trim();
+    let searchSummaryEnglish: string | null = null;
+    if (combinedNote) {
+      try {
+        const res = await fetch("/api/analyze-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notes: combinedNote }),
+        });
+        const data = await res.json();
+        if (data?.notesResult?.summaryEnglish) {
+          searchSummaryEnglish = data.notesResult.summaryEnglish;
+        }
+      } catch {
+        // proceed without summary
+      }
+    }
 
     const createdAtISO = entryDate ? new Date(entryDate + "T12:00:00").toISOString() : undefined;
     const payload = {
@@ -83,6 +107,7 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
       cure: isProblemType ? cure.trim() : undefined,
       youtubeLink: youtubeLink.trim() || undefined,
       media: uploadedMedia,
+      ...(searchSummaryEnglish != null && { searchSummaryEnglish }),
       ...(createdAtISO && { createdAt: createdAtISO }),
       ...(isEditing && initialEntry && { priority: initialEntry.priority }),
     };
@@ -106,6 +131,9 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
     setUploadedMedia([]);
     setEntryDate("");
     onOpenChange(false);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -114,7 +142,7 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Entry" : "Quick Add Entry"}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmitWithAiSummary} className="space-y-4">
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Date</label>
             <input
@@ -125,7 +153,7 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Option</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Category</label>
             <Select value={club} onValueChange={(v) => setClub(v as ClubCategory)} required>
               <SelectTrigger>
                 <SelectValue placeholder="" />
@@ -255,7 +283,9 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">{isEditing ? "Save" : "Add Entry"}</Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? "Saving…" : isEditing ? "Save" : "Add Entry"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

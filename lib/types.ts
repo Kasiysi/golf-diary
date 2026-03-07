@@ -1,12 +1,8 @@
 export type ClubCategory =
-  | "driver"
-  | "woods"
-  | "long-irons"
-  | "short-irons"
-  | "wedges"
-  | "putter"
-  | "setup"
-  | "anything";
+  | "long-game"
+  | "short-game"
+  | "putting"
+  | "coach-advice";
 
 export type SwingPhase = "none" | "setup" | "backswing" | "downswing";
 
@@ -37,6 +33,8 @@ export interface DiaryEntry {
   youtubeLink?: string;
   media: MediaItem[];
   priority?: boolean;
+  /** English summary for Finnish notes; used for semantic search */
+  searchSummaryEnglish?: string | null;
   createdAt: string;
 }
 

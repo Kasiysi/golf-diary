@@ -23,7 +23,7 @@ function getDefaultEntries(): DiaryEntry[] {
   return [
     {
       id: "1",
-      club: "driver",
+      club: "long-game",
       entryType: "feel",
       notes: "Smooth tempo – 'low and slow' on the takeaway.",
       media: [],
@@ -31,7 +31,7 @@ function getDefaultEntries(): DiaryEntry[] {
     },
     {
       id: "2",
-      club: "wedges",
+      club: "short-game",
       entryType: "problem",
       notes: "",
       problemNotes: "Chunking 56° from 50 yards – decelerating through impact.",
@@ -41,7 +41,7 @@ function getDefaultEntries(): DiaryEntry[] {
     },
     {
       id: "3",
-      club: "putter",
+      club: "putting",
       entryType: "coach-advice",
       notes: "Keep head still; stroke with shoulders, not hands.",
       media: [],

@@ -7,14 +7,10 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type ClubCategory =
-  | "driver"
-  | "woods"
-  | "long-irons"
-  | "short-irons"
-  | "wedges"
-  | "putter"
-  | "setup"
-  | "anything";
+  | "long_game"
+  | "short_game"
+  | "putting"
+  | "coach_advice";
 
 export type SwingPhase = "none" | "setup" | "backswing" | "downswing";
 
