@@ -33,9 +33,10 @@ export async function GET(request: NextRequest): Promise<NextResponse<ChecklistP
       return NextResponse.json({ items: [] });
     }
 
+    // cures_feels: use instruction/instruction_english (you added these); fallback to content/content_english if present
     const { data, error } = await supabase
       .from("cures_feels")
-      .select("id, content, content_english, type, created_at")
+      .select("id, instruction, instruction_english, type, created_at")
       .eq("user_id", userId)
       .eq("is_priority", true)
       .order("created_at", { ascending: false })
@@ -45,12 +46,18 @@ export async function GET(request: NextRequest): Promise<NextResponse<ChecklistP
       return NextResponse.json({ items: [], error: error.message });
     }
 
-    type CureRow = { id: string; content: string; content_english: string | null; type: string; created_at: string };
+    type CureRow = {
+      id: string;
+      instruction?: string | null;
+      instruction_english?: string | null;
+      type: string;
+      created_at: string;
+    };
     const rows = (data ?? []) as CureRow[];
     const items: ChecklistPriorityItem[] = rows.map((row) => ({
       id: row.id,
-      content: row.content,
-      contentEnglish: row.content_english ?? null,
+      content: row.instruction ?? "",
+      contentEnglish: row.instruction_english ?? null,
       type: row.type,
       createdAt: row.created_at,
     }));
