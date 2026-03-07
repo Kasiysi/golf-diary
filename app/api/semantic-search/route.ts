@@ -11,8 +11,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer, getServerUser, FALLBACK_USER_ID_FOR_DEV } from "@/lib/supabase/server";
 import { EMBEDDING_DIMENSION } from "@/lib/db/schema";
 
-const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
-
 export interface SemanticSearchMatch {
   cureId: string;
   cureContent: string;
@@ -43,7 +41,8 @@ async function getEmbedding(
   if (!apiKey || !text.trim()) return null;
 
   const input = text.trim().slice(0, 8000);
-  const url = `${API_BASE}/models/${model}:embedContent?key=${encodeURIComponent(apiKey)}`;
+  const apiBase = "https://generativelanguage.googleapis.com/v1beta";
+  const url = `${apiBase}/models/${model}:embedContent?key=${encodeURIComponent(apiKey)}`;
 
   try {
     const res = await fetch(url, {
@@ -77,6 +76,16 @@ async function getEmbedding(
 
 export async function POST(request: NextRequest): Promise<NextResponse<SemanticSearchResponse>> {
   try {
+    // Log env at the very start so Vercel logs show what's visible (no secret values)
+    const geminiKeyRaw = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+    console.log("Gemini Key length:", geminiKeyRaw?.length ?? "undefined");
+    const envSnapshot: Record<string, string> = {
+      GOOGLE_GENERATIVE_AI_API_KEY: geminiKeyRaw ? `set (length ${geminiKeyRaw.length})` : "missing",
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? "set" : "missing",
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "set" : "missing",
+    };
+    console.log("[semantic-search] Env snapshot:", JSON.stringify(envSnapshot));
+
     const body = await request.json().catch(() => ({}));
     const q = typeof body.q === "string" ? body.q.trim() : "";
     const limit = typeof body.limit === "number" ? Math.min(20, Math.max(1, body.limit)) : 5;
@@ -85,24 +94,19 @@ export async function POST(request: NextRequest): Promise<NextResponse<SemanticS
       return NextResponse.json({ matches: [], source: "none" });
     }
 
-    // Read env inside the handler so process.env is fully loaded (e.g. in serverless)
-    const apiKey = typeof process.env.GOOGLE_GENERATIVE_AI_API_KEY === "string"
-      ? process.env.GOOGLE_GENERATIVE_AI_API_KEY.trim()
-      : "";
-    // Debug: log whether the key is detected (length only, never the key itself)
-    console.log(
-      "[semantic-search] Debug: GOOGLE_GENERATIVE_AI_API_KEY",
-      apiKey ? `set (length ${apiKey.length})` : "missing"
-    );
-
+    // All env read inside POST (no top-level init) so process.env is fully loaded in serverless
+    const apiKey = typeof geminiKeyRaw === "string" ? geminiKeyRaw.trim() : "";
     const model = "text-embedding-004";
     const embedding = await getEmbedding(q, apiKey, model);
+
     if (!embedding) {
+      const envHelp = Object.entries(envSnapshot)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join("; ");
       return NextResponse.json({
         matches: [],
         source: "none",
-        error:
-          "Embedding not available (missing GOOGLE_GENERATIVE_AI_API_KEY or invalid response from embedding API)",
+        error: `Embedding not available. Check env in Vercel: ${envHelp}. Set GOOGLE_GENERATIVE_AI_API_KEY in Project Settings → Environment Variables and redeploy.`,
       });
     }
 
