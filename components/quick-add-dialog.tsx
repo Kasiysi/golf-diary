@@ -92,10 +92,10 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
             body: JSON.stringify({ notes: combinedNote }),
           });
           const data = await res.json();
-          if (data?.notesResult) {
-            if (data.notesResult.summaryEnglish) searchSummaryEnglish = data.notesResult.summaryEnglish;
-            if (data.notesResult.suggestedVideoUrl) suggestedVideoUrl = data.notesResult.suggestedVideoUrl;
-          }
+        if (data?.notesResult) {
+          if (data.notesResult.summaryEnglish) searchSummaryEnglish = data.notesResult.summaryEnglish;
+          if (data.notesResult.suggestedVideoUrl) suggestedVideoUrl = data.notesResult.suggestedVideoUrl;
+        }
         } catch {
           // proceed without AI result
         }
@@ -113,7 +113,7 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
         media: uploadedMedia,
         ...(searchSummaryEnglish != null && { searchSummaryEnglish }),
         ...((suggestedVideoUrl ?? (isEditing && initialEntry?.suggestedVideoUrl)) != null && {
-          suggestedVideoUrl: suggestedVideoUrl ?? initialEntry!.suggestedVideoUrl ?? null,
+          suggestedVideoUrl: suggestedVideoUrl ?? initialEntry?.suggestedVideoUrl ?? null,
         }),
         ...(createdAtISO && { createdAt: createdAtISO }),
         ...(isEditing && initialEntry && { priority: initialEntry.priority }),

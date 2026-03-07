@@ -89,9 +89,10 @@ export function EntryCard({
     entry.swingPhase && entry.swingPhase !== "none"
       ? SWING_PHASES.find((p) => p.value === entry.swingPhase)?.label
       : null;
-  const hasVideo = entry.media.some((m) => m.type === "video");
-  const hasImage = entry.media.some((m) => m.type === "image");
-  const firstMedia = entry.media[0];
+  const media = entry?.media ?? [];
+  const hasVideo = media.some((m) => m.type === "video");
+  const hasImage = media.some((m) => m.type === "image");
+  const firstMedia = media[0];
 
   // YouTube: same for Long Game, Short Game, Putting, Coach's Advice — no category filter. Check instruction, content, and all text fields.
   const textForYoutube = [
@@ -288,8 +289,8 @@ export function EntryCard({
             </div>
           )}
           {/* AI Coach: suggested YouTube (all categories); direct video = embed, search URL = link */}
-          {(entry.suggestedVideoUrl ?? (entry as { suggested_video_url?: string }).suggested_video_url) && (() => {
-            const url = (entry.suggestedVideoUrl ?? (entry as { suggested_video_url?: string }).suggested_video_url) ?? "";
+          {(entry?.suggestedVideoUrl ?? (entry as { suggested_video_url?: string } | undefined)?.suggested_video_url) && (() => {
+            const url = (entry?.suggestedVideoUrl ?? (entry as { suggested_video_url?: string } | undefined)?.suggested_video_url) ?? "";
             const embedId = getYouTubeVideoId(url);
             return (
               <div className="mt-2 rounded-xl border border-[var(--accent)]/20 bg-[var(--accent)]/5 px-3 py-2">
@@ -319,9 +320,9 @@ export function EntryCard({
               </div>
             );
           })()}
-          {(hasVideo || hasImage) && entry.media.length > 1 && (
+          {(hasVideo || hasImage) && (entry?.media?.length ?? 0) > 1 && (
             <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-              +{entry.media.length - 1} more
+              +{Math.max(0, (entry?.media?.length ?? 0) - 1)} more
             </p>
           )}
         </div>
