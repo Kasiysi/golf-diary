@@ -154,7 +154,7 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
               type="date"
               value={entryDate}
               onChange={(e) => setEntryDate(e.target.value)}
-              className="flex h-10 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm backdrop-blur-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              className="flex h-10 w-full rounded-xl border border-[var(--border)] bg-white px-3 py-2 text-sm text-[var(--foreground)] shadow-[var(--shadow-sm)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
             />
           </div>
           <div className="space-y-2">

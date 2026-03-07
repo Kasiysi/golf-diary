@@ -43,9 +43,9 @@ export default function DiaryPage() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
     >
-      <header className="sticky top-0 z-10 border-b border-white/10 bg-[#1a1a1c]/95 backdrop-blur-xl">
+      <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-white shadow-sm">
         <div className="flex h-14 items-center gap-3 px-4 md:px-6">
-          <h1 className="flex items-center gap-2 text-lg font-semibold shrink-0">
+          <h1 className="flex items-center gap-2 text-lg font-semibold shrink-0 text-[var(--foreground)]">
             <BookOpen className="h-5 w-5 text-[var(--accent)]" />
             Diary
           </h1>
@@ -57,7 +57,7 @@ export default function DiaryPage() {
                 value={searchQ}
                 onChange={(e) => setSearchQ(e.target.value)}
                 placeholder="Search (FI/EN)…"
-                className="w-full rounded-lg border border-white/20 bg-white/5 py-2 pl-8 pr-3 text-sm placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                className="w-full rounded-xl border border-[var(--border)] bg-white py-2 pl-8 pr-3 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] shadow-[var(--shadow-sm)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)]"
                 aria-label="Search"
               />
             </div>
@@ -82,7 +82,7 @@ export default function DiaryPage() {
                 <Link
                   key={value}
                   href={`/club/${value}`}
-                  className="flex items-center gap-3 rounded-2xl border-2 border-[var(--accent)]/50 bg-[var(--accent)]/10 px-4 py-3 text-[var(--foreground)] font-medium hover:bg-[var(--accent)]/20 hover:border-[var(--accent)] transition-colors min-h-[3.5rem]"
+                  className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-[var(--foreground)] font-medium shadow-[var(--shadow)] hover:shadow-[var(--shadow-md)] hover:border-[var(--accent)]/30 hover:bg-[var(--accent)]/5 transition-all min-h-[3.5rem]"
                 >
                   {Icon && <Icon className="h-6 w-6 text-[var(--accent)] shrink-0" />}
                   <span className="truncate">{label}</span>
@@ -106,7 +106,7 @@ export default function DiaryPage() {
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-dashed border-white/10 bg-white/5 backdrop-blur-xl p-8 text-center text-[var(--muted-foreground)]"
+              className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--background-muted)] p-8 text-center text-[var(--muted-foreground)]"
             >
               No entries yet. Tap the + button to add your first note.
             </motion.div>

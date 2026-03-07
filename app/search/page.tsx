@@ -83,9 +83,9 @@ function SearchContent() {
 
   return (
     <>
-      <header className="sticky top-0 z-10 border-b border-white/10 bg-[#1a1a1c]/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-white shadow-sm">
         <div className="flex h-14 items-center px-4 md:px-6">
-          <h1 className="flex items-center gap-2 text-lg font-semibold">
+          <h1 className="flex items-center gap-2 text-lg font-semibold text-[var(--foreground)]">
             <Search className="h-5 w-5 text-[var(--accent)]" />
             Search
           </h1>
@@ -99,14 +99,14 @@ function SearchContent() {
         </p>
 
         {!q ? (
-          <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 backdrop-blur-xl p-8 text-center text-[var(--muted-foreground)]">
+          <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--background-muted)] p-8 text-center text-[var(--muted-foreground)]">
             Use the search bar in the sidebar to find entries by problem, cure, or coach advice text.
           </div>
         ) : (
           <>
             {/* Semantic results (linked cures / direct cures) */}
             {semanticLoading && (
-              <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 text-center text-sm text-[var(--muted-foreground)]">
+              <div className="rounded-2xl border border-[var(--border)] bg-white shadow-[var(--shadow)] p-4 text-center text-sm text-[var(--muted-foreground)]">
                 Semantic search…
               </div>
             )}
@@ -129,7 +129,7 @@ function SearchContent() {
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
-                        className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden"
+                        className="rounded-2xl border border-[var(--border)] bg-white shadow-[var(--shadow)] overflow-hidden"
                       >
                         <div className="p-4 space-y-2">
                           {match.faultDescription != null && (
@@ -167,7 +167,7 @@ function SearchContent() {
                 In your diary
               </h2>
               {filtered.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 backdrop-blur-xl p-8 text-center text-[var(--muted-foreground)]">
+                <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--background-muted)] p-8 text-center text-[var(--muted-foreground)]">
                   No diary entries match &quot;{q}&quot;.
                 </div>
               ) : (

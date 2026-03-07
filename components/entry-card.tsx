@@ -34,10 +34,10 @@ const ENTRY_TYPE_ICONS: Record<EntryType, React.ComponentType<{ className?: stri
 };
 
 const ENTRY_TYPE_GLOW: Record<EntryType, string> = {
-  feel: "bg-amber-500/20 ring-amber-500/40 text-amber-400",
-  problem: "bg-red-500/20 ring-red-500/40 text-red-400",
-  drill: "bg-blue-500/20 ring-blue-500/40 text-blue-400",
-  "coach-advice": "bg-[var(--accent)]/20 ring-[var(--accent)]/40 text-[var(--accent)]",
+  feel: "bg-amber-50 ring-amber-200 text-amber-700",
+  problem: "bg-red-50 ring-red-200 text-red-700",
+  drill: "bg-blue-50 ring-blue-200 text-blue-700",
+  "coach-advice": "bg-[var(--accent)]/10 ring-[var(--accent)]/20 text-[var(--accent)]",
 };
 
 const UTFS_IO_ORIGIN = "https://utfs.io";
@@ -119,7 +119,7 @@ export function EntryCard({
   const hasCure = entry.entryType === "problem" && entry.cure;
   const EntryTypeIcon = ENTRY_TYPE_ICONS[entry.entryType];
 
-  const thumbContainerClass = "shrink-0 w-20 h-20 rounded-2xl overflow-hidden relative flex items-center justify-center";
+  const thumbContainerClass = "shrink-0 w-20 h-20 rounded-xl overflow-hidden relative flex items-center justify-center bg-[var(--muted)] border border-[var(--border)]";
   const videoUrl = firstMedia?.type === "video" ? fullMediaUrl(firstMedia.url) : "";
   const videoThumbUrl = firstMedia?.type === "video" ? fullMediaUrl(firstMedia?.thumbnailUrl) : "";
   const imageUrl = firstMedia?.type === "image" ? fullMediaUrl(firstMedia.url) : "";
@@ -133,7 +133,7 @@ export function EntryCard({
   const showIcon = !firstMedia || (!showVideoThumb && !showVideoElement && !showNextImage && !showImgFallback);
 
   const mediaThumb = (
-    <div className={cn(thumbContainerClass, "bg-white/5 backdrop-blur-sm border border-white/10")}>
+    <div className={cn(thumbContainerClass)}>
       {firstMedia?.type === "video" && (showVideoThumb || showVideoElement) ? (
         <>
           {showVideoThumb && videoThumbUrl ? (
@@ -177,8 +177,8 @@ export function EntryCard({
       {showIcon ? (
         <span
           className={cn(
-            "flex h-12 w-12 items-center justify-center rounded-full ring-2 backdrop-blur-sm",
-            firstMedia?.type === "video" ? "bg-[var(--accent)]/20 ring-[var(--accent)]/40 text-[var(--accent)]" : ENTRY_TYPE_GLOW[entry.entryType]
+            "flex h-12 w-12 items-center justify-center rounded-full ring-2 ring-[var(--border)]",
+            firstMedia?.type === "video" ? "bg-[var(--accent)]/10 ring-[var(--accent)]/20 text-[var(--accent)]" : ENTRY_TYPE_GLOW[entry.entryType]
           )}
         >
           {firstMedia?.type === "video" ? (
@@ -194,7 +194,7 @@ export function EntryCard({
   return (
     <article
       className={cn(
-        "rounded-2xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-xl",
+        "rounded-2xl overflow-hidden bg-white border border-[var(--border)] shadow-[var(--shadow)]",
         compact ? "p-3" : "p-4"
       )}
     >
@@ -203,7 +203,7 @@ export function EntryCard({
           <button
             type="button"
             onClick={() => onVideoClick(firstMedia.url)}
-            className={cn(thumbContainerClass, "focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2 focus:ring-offset-[var(--background)]")}
+            className={cn(thumbContainerClass, "focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2 focus:ring-offset-white")}
             aria-label="Play swing video"
           >
             {mediaThumb}
@@ -213,11 +213,11 @@ export function EntryCard({
         )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="inline-flex items-center rounded-md bg-[var(--accent)]/15 px-2 py-0.5 font-medium text-[var(--accent)] ring-1 ring-[var(--accent)]/30 uppercase tracking-wider">
+            <span className="inline-flex items-center rounded-lg bg-[var(--accent)]/10 px-2 py-0.5 font-medium text-[var(--accent)] border border-[var(--accent)]/20 uppercase tracking-wider">
               {clubLabel}
             </span>
             {swingPhaseLabel && (
-              <span className="inline-flex items-center gap-1 rounded-md bg-blue-500/15 px-2 py-0.5 font-medium text-blue-400 ring-1 ring-blue-500/20 uppercase tracking-wider" title="Swing phase">
+              <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-0.5 font-medium text-blue-700 border border-blue-200 uppercase tracking-wider" title="Swing phase">
                 <span className="text-[10px] opacity-80">Phase:</span>
                 {swingPhaseLabel}
               </span>
@@ -231,7 +231,7 @@ export function EntryCard({
               <button
                 type="button"
                 onClick={() => togglePriority(entry.id)}
-                className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-[var(--muted)] transition-colors"
                 aria-label={entry.priority ? "Remove priority" : "Mark as priority"}
                 title={entry.priority ? "Poista prioriteetti" : "Merkitse prioriteetiksi (is_priority)"}
               >
@@ -247,7 +247,7 @@ export function EntryCard({
               <button
                 type="button"
                 onClick={() => openQuickAdd(entry)}
-                className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-[var(--muted)] transition-colors"
                 aria-label="Edit entry"
               >
                 <Pencil className="h-4 w-4 text-[var(--muted-foreground)]" />
@@ -266,7 +266,7 @@ export function EntryCard({
             {mainText}
           </p>
           {hasCure && (
-            <div className="mt-2 rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-3 py-2">
+            <div className="mt-2 rounded-xl border border-[var(--accent)]/20 bg-[var(--accent)]/5 px-3 py-2">
               <p className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
                 Cure
               </p>
@@ -292,7 +292,7 @@ export function EntryCard({
             const url = (entry.suggestedVideoUrl ?? (entry as { suggested_video_url?: string }).suggested_video_url) ?? "";
             const embedId = getYouTubeVideoId(url);
             return (
-              <div className="mt-2 rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/5 px-3 py-2">
+              <div className="mt-2 rounded-xl border border-[var(--accent)]/20 bg-[var(--accent)]/5 px-3 py-2">
                 <p className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
                   AI suosittelee harjoitusta
                 </p>

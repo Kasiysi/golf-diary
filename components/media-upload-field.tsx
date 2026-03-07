@@ -78,7 +78,7 @@ export function MediaUploadField({ onUploadComplete, disabled }: Props) {
         type="button"
         disabled={disabled || isUploading}
         onClick={() => inputRef.current?.click()}
-        className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium hover:bg-white/10 disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-medium shadow-[var(--shadow-sm)] hover:bg-[var(--muted)] disabled:opacity-50"
       >
         <ImagePlus className="h-4 w-4" />
         {isUploading ? "Uploading…" : "Library"}
@@ -87,7 +87,7 @@ export function MediaUploadField({ onUploadComplete, disabled }: Props) {
         type="button"
         disabled={disabled || isUploading}
         onClick={() => captureInputRef.current?.click()}
-        className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium hover:bg-white/10 disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-sm font-medium shadow-[var(--shadow-sm)] hover:bg-[var(--muted)] disabled:opacity-50"
       >
         <Camera className="h-4 w-4" />
         Camera

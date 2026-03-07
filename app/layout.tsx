@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import "./globals.css";
@@ -7,9 +7,10 @@ import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { AppLayout } from "@/components/layout/app-layout";
 import { FABWrapper } from "@/components/fab-wrapper";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -28,8 +29,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="en">
+      <body className={`${inter.variable} ${geistMono.variable} font-sans antialiased`}>
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <AppLayout>
           {children}

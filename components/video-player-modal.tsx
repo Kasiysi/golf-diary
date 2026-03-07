@@ -48,7 +48,7 @@ export function VideoPlayerModal({ url, open, onOpenChange }: Props) {
               className="w-full aspect-video"
               onEnded={() => onOpenChange(false)}
             />
-            <div className="flex flex-wrap items-center gap-2 px-3 py-2 border-t border-white/10 bg-white/5 backdrop-blur-xl">
+            <div className="flex flex-wrap items-center gap-2 px-3 py-2 border-t border-[var(--border)] bg-[var(--background-muted)]">
               <span className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Speed</span>
               <div className="flex flex-wrap gap-1.5">
                 {SPEEDS.map(({ label, value }) => (
@@ -56,7 +56,7 @@ export function VideoPlayerModal({ url, open, onOpenChange }: Props) {
                     key={value}
                     type="button"
                     onClick={() => setSpeed(value)}
-                    className="h-8 min-w-[3rem] rounded-lg border border-white/10 bg-white/5 px-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--accent)]/20 hover:border-[var(--accent)]/30 hover:text-[var(--accent)] transition-colors"
+                    className="h-8 min-w-[3rem] rounded-lg border border-[var(--border)] bg-white px-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--accent)]/10 hover:border-[var(--accent)]/30 hover:text-[var(--accent)] transition-colors"
                   >
                     {label}
                   </button>

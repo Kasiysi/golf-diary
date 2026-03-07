@@ -31,7 +31,7 @@ export function FundamentalsChecklist() {
   if (items.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden">
+    <div className="rounded-2xl border border-[var(--border)] bg-white shadow-[var(--shadow)] overflow-hidden">
       <div className="flex items-center justify-between">
         <button
           type="button"
@@ -52,14 +52,14 @@ export function FundamentalsChecklist() {
           <button
             type="button"
             onClick={resetToday}
-            className="px-3 py-2 text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-white/5"
+            className="px-3 py-2 text-xs font-medium text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
           >
             Reset
           </button>
         )}
       </div>
       {open && (
-        <ul className="border-t border-white/10 px-4 py-3 space-y-3">
+        <ul className="border-t border-[var(--border)] px-4 py-3 space-y-3">
           {items.map((item) => {
             const checked = checkedIds.includes(item.id);
             return (

@@ -32,7 +32,7 @@ export function PracticePlanModal({ open, onOpenChange, plan, isLoading }: Props
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg border border-white/10 bg-white/5 backdrop-blur-xl">
+      <DialogContent className="max-w-lg border border-[var(--border)] bg-white shadow-xl">
         <DialogHeader>
           <DialogTitle className="text-[var(--accent)]">Practice Plan</DialogTitle>
         </DialogHeader>
@@ -43,13 +43,13 @@ export function PracticePlanModal({ open, onOpenChange, plan, isLoading }: Props
           </div>
         ) : plan ? (
           <div className="space-y-5">
-            <section className="rounded-xl border border-white/10 bg-white/5 p-4">
+            <section className="rounded-xl border border-[var(--border)] bg-[var(--background-muted)] p-4">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)] mb-2">
                 Core Focus
               </h3>
               <p className="text-sm text-[var(--foreground)]">{plan.coreFocus}</p>
             </section>
-            <section className="rounded-xl border border-white/10 bg-white/5 p-4">
+            <section className="rounded-xl border border-[var(--border)] bg-[var(--background-muted)] p-4">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)] mb-2">
                 The Feel List
               </h3>
@@ -59,7 +59,7 @@ export function PracticePlanModal({ open, onOpenChange, plan, isLoading }: Props
                 ))}
               </ul>
             </section>
-            <section className="rounded-xl border border-white/10 bg-white/5 p-4">
+            <section className="rounded-xl border border-[var(--border)] bg-[var(--background-muted)] p-4">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)] mb-2">
                 The Drill Plan
               </h3>

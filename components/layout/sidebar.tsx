@@ -46,11 +46,11 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="hidden md:flex w-56 flex-col border-r border-white/10 bg-[#1a1a1c]/95 backdrop-blur-xl">
-      <div className="flex h-14 items-center border-b border-white/10 px-4">
+    <aside className="hidden md:flex w-56 flex-col border-r border-[var(--border)] bg-[var(--card)] shadow-sm">
+      <div className="flex h-14 items-center border-b border-[var(--border)] px-4">
         <span className="font-semibold text-[var(--accent)]">Golf Diary</span>
       </div>
-      <form onSubmit={handleSearch} className="p-3 border-b border-white/10">
+      <form onSubmit={handleSearch} className="p-3 border-b border-[var(--border)]">
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
           <input
@@ -60,7 +60,7 @@ export function Sidebar() {
             key={`search-${pathname}-${qFromUrl}`}
             defaultValue={pathname === "/search" ? qFromUrl : ""}
             placeholder="Search (FI/EN)…"
-            className="w-full rounded-lg border border-white/20 bg-white/5 py-2 pl-8 pr-3 text-sm placeholder:text-[var(--muted-foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)]"
+            className="w-full rounded-xl border border-[var(--border)] bg-white py-2 pl-8 pr-3 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] shadow-[var(--shadow-sm)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)]"
             aria-label="Search problems, cures, coach advice"
           />
         </div>
@@ -71,8 +71,8 @@ export function Sidebar() {
           className={cn(
             "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
             pathname === "/"
-              ? "bg-[var(--accent)]/20 text-[var(--accent)]"
-              : "text-[var(--muted-foreground)] hover:bg-white/10 hover:text-[var(--foreground)]"
+              ? "bg-[var(--accent)]/10 text-[var(--accent)]"
+              : "text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
           )}
         >
           <BookOpen className="h-5 w-5" />
@@ -93,8 +93,8 @@ export function Sidebar() {
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors border border-transparent",
                 isActive
-                  ? "bg-[var(--accent)]/20 text-[var(--accent)] border-[var(--accent)]/40"
-                  : "text-[var(--foreground)] hover:bg-white/10 border-white/10 hover:border-white/20"
+                  ? "bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/30"
+                  : "text-[var(--foreground)] hover:bg-[var(--muted)] border-transparent"
               )}
             >
               {Icon && <Icon className="h-5 w-5 shrink-0" />}
@@ -116,8 +116,8 @@ export function Sidebar() {
             className={cn(
               "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
               pathname === href
-                ? "bg-[var(--accent)]/20 text-[var(--accent)]"
-                : "text-[var(--muted-foreground)] hover:bg-white/10 hover:text-[var(--foreground)]"
+                ? "bg-[var(--accent)]/10 text-[var(--accent)]"
+                : "text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
             )}
           >
             <Icon className="h-5 w-5" />

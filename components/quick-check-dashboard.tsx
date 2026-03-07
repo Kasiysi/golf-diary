@@ -67,7 +67,7 @@ export function QuickCheckDashboard() {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-[var(--shadow)]">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
           <Star className="h-4 w-4" />
           Quick-Check (Top 3)
@@ -79,7 +79,7 @@ export function QuickCheckDashboard() {
 
   if (error || items.length === 0) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-[var(--shadow)]">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
           <Star className="h-4 w-4" />
           Quick-Check (Top 3)
@@ -92,14 +92,14 @@ export function QuickCheckDashboard() {
   }
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-white/10">
+    <div className="rounded-2xl border border-[var(--border)] bg-white overflow-hidden shadow-[var(--shadow)]">
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-[var(--border)]">
         <Star className="h-4 w-4 text-[var(--accent)] fill-[var(--accent)]" />
         <span className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
           Quick-Check — Top 3 (cures_feels, is_priority = true)
         </span>
       </div>
-      <ul className="divide-y divide-white/10">
+      <ul className="divide-y divide-[var(--border)]">
         {items.map((item, i) => (
           <li key={item.id} className="px-4 py-3">
             <div className="flex items-center gap-2 flex-wrap">
@@ -117,7 +117,7 @@ export function QuickCheckDashboard() {
               {item.contentEnglish ?? item.content}
             </p>
             {item.suggestedVideoUrl && (
-              <div className="mt-1.5 rounded-lg border border-[var(--accent)]/20 bg-[var(--accent)]/5 px-2 py-1.5">
+              <div className="mt-1.5 rounded-lg border border-[var(--accent)]/15 bg-[var(--accent)]/5 px-2 py-1.5">
                 <span className="text-[10px] font-semibold uppercase text-[var(--accent)]">AI suosittelee</span>
                 <a
                   href={item.suggestedVideoUrl}

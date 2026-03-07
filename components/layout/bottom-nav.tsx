@@ -36,7 +36,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-white/10 bg-[#1a1a1c]/95 backdrop-blur-xl py-2 md:hidden safe-area-pb">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-[var(--border)] bg-[var(--card)] shadow-[0_-1px_3px_0_rgb(0_0_0/0.08)] py-2 md:hidden safe-area-pb">
       {mobileNavItems.map(({ href, label, icon: Icon }) => {
         const isActive = pathname === href;
         return (
@@ -46,8 +46,8 @@ export function BottomNav() {
             className={cn(
               "flex flex-col items-center gap-1 rounded-xl px-2 py-2 min-w-[4rem] text-xs font-medium transition-colors border border-transparent",
               isActive
-                ? "text-[var(--accent)] border-[var(--accent)]/40 bg-[var(--accent)]/10"
-                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-white/5"
+                ? "text-[var(--accent)] border-[var(--accent)]/30 bg-[var(--accent)]/10"
+                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]"
             )}
           >
             <Icon className="h-5 w-5" />

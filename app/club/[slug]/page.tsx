@@ -48,7 +48,7 @@ export default function ClubPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-10 border-b border-white/10 bg-[#1a1a1c]/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-white shadow-sm">
         <div className="flex h-14 items-center px-4 md:px-6">
           <h1 className="text-lg font-semibold text-[var(--foreground)]">
             {club.label}
@@ -90,7 +90,7 @@ export default function ClubPage() {
             Media Gallery
           </h2>
           {media.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 backdrop-blur-xl p-6 text-center text-sm text-[var(--muted-foreground)]">
+            <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--background-muted)] p-6 text-center text-sm text-[var(--muted-foreground)]">
               No photos or videos for this club yet.
             </div>
           ) : (
@@ -173,7 +173,7 @@ export default function ClubPage() {
         />
 
         {clubEntries.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 backdrop-blur-xl p-8 text-center text-[var(--muted-foreground)]">
+          <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--background-muted)] p-8 text-center text-[var(--muted-foreground)]">
             No entries for {club.label} yet. Use the + button to add one.
           </div>
         )}
