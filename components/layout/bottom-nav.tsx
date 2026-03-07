@@ -22,7 +22,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 const mobileNavItems = [
-  { href: "/", label: "Diary", icon: BookOpen },
+  { href: "/diary", label: "Diary", icon: BookOpen },
   ...CLUB_CATEGORIES.map((c) => ({
     href: `/club/${c.value}`,
     label: c.label,

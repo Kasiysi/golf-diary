@@ -21,7 +21,7 @@ export default function PrioritiesPage() {
     >
       <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-white shadow-sm">
         <div className="flex h-14 items-center px-4 md:px-6">
-          <h1 className="flex items-center gap-2 text-lg font-semibold">
+          <h1 className="font-heading flex items-center gap-2 text-xl font-semibold text-[var(--heading)]">
             <Star className="h-5 w-5 text-[var(--accent)]" />
             Priorities
           </h1>

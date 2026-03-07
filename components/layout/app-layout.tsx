@@ -28,7 +28,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <Suspense fallback={<SidebarFallback />}>
                 <Sidebar />
               </Suspense>
-              <main className="flex-1 pb-20 md:pb-0 md:min-h-screen">
+              <main className="flex-1 pb-20 md:pb-0 md:min-h-screen overflow-y-auto min-h-0">
                 {children}
               </main>
             </div>

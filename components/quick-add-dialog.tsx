@@ -143,11 +143,12 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent className="p-0 max-h-[90dvh] sm:max-h-[85vh]">
+        <DialogHeader className="p-6 pb-2 shrink-0">
           <DialogTitle>{isEditing ? "Edit Entry" : "Quick Add Entry"}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmitWithAiSummary} className="space-y-4">
+        <form onSubmit={handleSubmitWithAiSummary} className="flex flex-col flex-1 min-h-0">
+          <div className="overflow-y-auto flex-1 px-6 space-y-4 min-h-0">
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Date</label>
             <input
@@ -284,7 +285,8 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
               </p>
             )}
           </div>
-          <DialogFooter>
+          </div>
+          <DialogFooter className="p-6 pt-4 shrink-0 border-t border-[var(--border)] bg-[var(--background-muted)]">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
