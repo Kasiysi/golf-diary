@@ -93,13 +93,15 @@ export function EntryCard({
   const hasImage = entry.media.some((m) => m.type === "image");
   const firstMedia = entry.media[0];
 
-  // All categories (Long Game, Short Game, Putting, Coach's Advice): show YouTube if link is in any text field or youtubeLink
+  // All categories: show YouTube if link is in any text field or youtubeLink (include English fields so no category is missed)
   const textForYoutube = [
     entry.notes,
     entry.problemNotes,
     entry.cure,
     (entry as { instruction?: string }).instruction,
+    (entry as { instruction_english?: string }).instruction_english,
     (entry as { content?: string }).content,
+    (entry as { content_english?: string }).content_english,
   ]
     .filter(Boolean)
     .join(" ");

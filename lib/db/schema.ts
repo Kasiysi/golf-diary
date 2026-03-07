@@ -68,15 +68,16 @@ export type FaultInsert = Omit<FaultRow, "id" | "created_at" | "embedding"> &
 
 export type FaultUpdate = Partial<Omit<FaultRow, "id" | "user_id">>;
 
-/** cures_feels table row (Checklist = is_priority) */
+/** cures_feels table row (Checklist = is_priority). DB columns: instruction, instruction_english, suggested_video_url. */
 export interface CureFeelRow {
   id: string;
   user_id: string;
   entry_id: string | null;
   type: EntryType;
-  content: string;
-  content_english: string | null;
+  instruction: string;
+  instruction_english: string | null;
   is_priority: boolean;
+  suggested_video_url: string | null;
   created_at: string;
   embedding: number[] | null;
 }

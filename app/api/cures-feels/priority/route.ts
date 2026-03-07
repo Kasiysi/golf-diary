@@ -41,17 +41,10 @@ export async function PATCH(request: NextRequest): Promise<NextResponse<{ succes
     const updatePayload: { is_priority: boolean; suggested_video_url?: string } = { is_priority: priority };
     if (suggestedVideoUrl !== undefined) updatePayload.suggested_video_url = suggestedVideoUrl;
 
+    // Supabase client infers update() arg as never when Table types don't match; cast to satisfy typecheck
     const { error: err } = cureId
-      ? await supabase
-          .from("cures_feels")
-          .update(updatePayload)
-          .eq("id", cureId)
-          .eq("user_id", userId)
-      : await supabase
-          .from("cures_feels")
-          .update(updatePayload)
-          .eq("entry_id", entryId!)
-          .eq("user_id", userId);
+      ? await supabase.from("cures_feels").update(updatePayload as never).eq("id", cureId).eq("user_id", userId)
+      : await supabase.from("cures_feels").update(updatePayload as never).eq("entry_id", entryId!).eq("user_id", userId);
 
     if (err) {
       console.error("[cures-feels/priority]", err);

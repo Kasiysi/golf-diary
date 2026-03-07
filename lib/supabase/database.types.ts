@@ -61,14 +61,24 @@ export interface Database {
           user_id: string;
           entry_id: string | null;
           type: EntryType;
-          content: string;
-          content_english: string | null;
+          instruction: string;
+          instruction_english: string | null;
           is_priority: boolean;
+          suggested_video_url: string | null;
           created_at: string;
           embedding: number[] | null;
         };
         Insert: Record<string, unknown>;
-        Update: Record<string, unknown>;
+        Update: Partial<{
+          entry_id: string | null;
+          type: EntryType;
+          instruction: string;
+          instruction_english: string | null;
+          is_priority: boolean;
+          suggested_video_url: string | null;
+          created_at: string;
+          embedding: number[] | null;
+        }>;
       };
       fault_cure_links: {
         Row: {
