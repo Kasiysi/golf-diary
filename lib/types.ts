@@ -35,6 +35,8 @@ export interface DiaryEntry {
   priority?: boolean;
   /** English summary for Finnish notes; used for semantic search */
   searchSummaryEnglish?: string | null;
+  /** AI Coach: suggested YouTube tutorial URL (from Gemini when analyzing Finnish notes) */
+  suggestedVideoUrl?: string | null;
   createdAt: string;
 }
 

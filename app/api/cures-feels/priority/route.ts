@@ -1,8 +1,8 @@
 /**
  * PATCH /api/cures-feels/priority
  *
- * Updates is_priority in cures_feels for the given entry_id (or cure_id).
- * Body: { entryId?: string, cureId?: string, priority: boolean }
+ * Updates is_priority (and optionally suggested_video_url) in cures_feels for the given entry_id (or cure_id).
+ * Body: { entryId?: string, cureId?: string, priority: boolean, suggestedVideoUrl?: string }
  * At least one of entryId or cureId required. Uses Supabase + FALLBACK_USER_ID_FOR_DEV when not logged in.
  */
 
@@ -15,6 +15,10 @@ export async function PATCH(request: NextRequest): Promise<NextResponse<{ succes
     const entryId = typeof body.entryId === "string" ? body.entryId.trim() : undefined;
     const cureId = typeof body.cureId === "string" ? body.cureId.trim() : undefined;
     const priority = typeof body.priority === "boolean" ? body.priority : undefined;
+    const suggestedVideoUrl =
+      typeof body.suggestedVideoUrl === "string" && body.suggestedVideoUrl.startsWith("http")
+        ? body.suggestedVideoUrl.trim()
+        : undefined;
 
     if (priority === undefined) {
       return NextResponse.json({ success: false, error: "priority (boolean) required" }, { status: 400 });
@@ -34,15 +38,18 @@ export async function PATCH(request: NextRequest): Promise<NextResponse<{ succes
     const user = await getServerUser();
     const userId = user?.id ?? FALLBACK_USER_ID_FOR_DEV;
 
+    const updatePayload: { is_priority: boolean; suggested_video_url?: string } = { is_priority: priority };
+    if (suggestedVideoUrl !== undefined) updatePayload.suggested_video_url = suggestedVideoUrl;
+
     const { error: err } = cureId
       ? await supabase
           .from("cures_feels")
-          .update({ is_priority: priority })
+          .update(updatePayload)
           .eq("id", cureId)
           .eq("user_id", userId)
       : await supabase
           .from("cures_feels")
-          .update({ is_priority: priority })
+          .update(updatePayload)
           .eq("entry_id", entryId!)
           .eq("user_id", userId);
 

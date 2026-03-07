@@ -284,6 +284,38 @@ export function EntryCard({
               />
             </div>
           )}
+          {/* AI Coach: suggested YouTube (all categories); direct video = embed, search URL = link */}
+          {(entry.suggestedVideoUrl ?? (entry as { suggested_video_url?: string }).suggested_video_url) && (() => {
+            const url = (entry.suggestedVideoUrl ?? (entry as { suggested_video_url?: string }).suggested_video_url) ?? "";
+            const embedId = getYouTubeVideoId(url);
+            return (
+              <div className="mt-2 rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/5 px-3 py-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
+                  AI suosittelee harjoitusta
+                </p>
+                {embedId ? (
+                  <div className="mt-1.5 rounded-lg overflow-hidden aspect-video max-w-full bg-black">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${embedId}`}
+                      title="AI suosittelee harjoitusta"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="w-full h-full"
+                    />
+                  </div>
+                ) : (
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 block text-sm text-[var(--accent)] underline hover:opacity-90"
+                  >
+                    Katso harjoituksia YouTubessa →
+                  </a>
+                )}
+              </div>
+            );
+          })()}
           {(hasVideo || hasImage) && entry.media.length > 1 && (
             <p className="mt-1 text-xs text-[var(--muted-foreground)]">
               +{entry.media.length - 1} more

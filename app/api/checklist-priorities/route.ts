@@ -14,6 +14,8 @@ export interface ChecklistPriorityItem {
   contentEnglish: string | null;
   type: string;
   createdAt: string;
+  /** AI Coach suggested YouTube URL (from cures_feels.suggested_video_url) */
+  suggestedVideoUrl?: string | null;
 }
 
 export interface ChecklistPrioritiesResponse {
@@ -33,10 +35,10 @@ export async function GET(request: NextRequest): Promise<NextResponse<ChecklistP
       return NextResponse.json({ items: [] });
     }
 
-    // cures_feels: instruction, instruction_english; only is_priority = true
+    // cures_feels: instruction, instruction_english, suggested_video_url; only is_priority = true
     const { data, error } = await supabase
       .from("cures_feels")
-      .select("id, instruction, instruction_english, type, created_at")
+      .select("id, instruction, instruction_english, type, created_at, suggested_video_url")
       .eq("user_id", userId)
       .eq("is_priority", true)
       .order("created_at", { ascending: false })
@@ -52,6 +54,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ChecklistP
       instruction_english?: string | null;
       type: string;
       created_at: string;
+      suggested_video_url?: string | null;
     };
     const rows = (data ?? []) as CureRow[];
     const items: ChecklistPriorityItem[] = rows.map((row) => ({
@@ -60,6 +63,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ChecklistP
       contentEnglish: row.instruction_english ?? null,
       type: row.type,
       createdAt: row.created_at,
+      suggestedVideoUrl: row.suggested_video_url ?? null,
     }));
 
     return NextResponse.json({ items });

@@ -81,6 +81,7 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
         ? [problemNotes.trim(), cure.trim()].filter(Boolean).join(" ")
         : notes.trim();
     let searchSummaryEnglish: string | null = null;
+    let suggestedVideoUrl: string | null = null;
     if (combinedNote) {
       try {
         const res = await fetch("/api/analyze-session", {
@@ -89,11 +90,12 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
           body: JSON.stringify({ notes: combinedNote }),
         });
         const data = await res.json();
-        if (data?.notesResult?.summaryEnglish) {
-          searchSummaryEnglish = data.notesResult.summaryEnglish;
+        if (data?.notesResult) {
+          if (data.notesResult.summaryEnglish) searchSummaryEnglish = data.notesResult.summaryEnglish;
+          if (data.notesResult.suggestedVideoUrl) suggestedVideoUrl = data.notesResult.suggestedVideoUrl;
         }
       } catch {
-        // proceed without summary
+        // proceed without AI result
       }
     }
 
@@ -108,6 +110,9 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
       youtubeLink: youtubeLink.trim() || undefined,
       media: uploadedMedia,
       ...(searchSummaryEnglish != null && { searchSummaryEnglish }),
+      ...((suggestedVideoUrl ?? (isEditing && initialEntry?.suggestedVideoUrl)) != null && {
+        suggestedVideoUrl: suggestedVideoUrl ?? initialEntry!.suggestedVideoUrl ?? null,
+      }),
       ...(createdAtISO && { createdAt: createdAtISO }),
       ...(isEditing && initialEntry && { priority: initialEntry.priority }),
     };

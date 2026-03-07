@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { ListChecks } from "lucide-react";
+import { getYouTubeVideoId } from "@/lib/utils";
 
 export interface ChecklistPriorityItem {
   id: string;
@@ -9,6 +10,7 @@ export interface ChecklistPriorityItem {
   contentEnglish: string | null;
   type: string;
   createdAt: string;
+  suggestedVideoUrl?: string | null;
 }
 
 export function QuickCheckDashboard() {
@@ -85,6 +87,30 @@ export function QuickCheckDashboard() {
             <p className="mt-0.5 text-sm text-[var(--foreground)]">
               {item.contentEnglish ?? item.content}
             </p>
+            {item.suggestedVideoUrl && (
+              <div className="mt-1.5 rounded-lg border border-[var(--accent)]/20 bg-[var(--accent)]/5 px-2 py-1.5">
+                <span className="text-[10px] font-semibold uppercase text-[var(--accent)]">AI suosittelee</span>
+                {getYouTubeVideoId(item.suggestedVideoUrl) ? (
+                  <a
+                    href={item.suggestedVideoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-0.5 block text-xs text-[var(--accent)] underline"
+                  >
+                    Katso harjoitus →
+                  </a>
+                ) : (
+                  <a
+                    href={item.suggestedVideoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-0.5 block text-xs text-[var(--accent)] underline"
+                  >
+                    Hae harjoituksia YouTubessa →
+                  </a>
+                )}
+              </div>
+            )}
           </li>
         ))}
       </ul>

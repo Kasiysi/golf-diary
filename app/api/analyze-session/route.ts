@@ -49,6 +49,8 @@ export interface AnalyzeSessionVoiceResult {
 export interface AnalyzeSessionNotesResult {
   summaryEnglish: string;
   tags?: string[];
+  /** AI Coach: best YouTube tutorial link (direct video or search); English content preferred */
+  suggestedVideoUrl?: string;
   error?: string;
 }
 
@@ -122,7 +124,7 @@ No other text, no markdown, just the JSON object.`;
   }
 }
 
-/** Gemini text: Finnish → search_summary_english and tags for DB */
+/** Gemini text: Finnish → summary, tags, and AI Coach suggested YouTube link (all categories) */
 async function optimizeNotesForSearch(notes: string): Promise<AnalyzeSessionNotesResult> {
   if (!genAI || !notes.trim()) {
     return { summaryEnglish: "", error: "Gemini not configured or empty notes" };
@@ -132,10 +134,16 @@ async function optimizeNotesForSearch(notes: string): Promise<AnalyzeSessionNote
   }
   try {
     const model = genAI.getGenerativeModel({ model: MODEL });
-    const prompt = `The following is a Finnish golf practice note. Produce a short English summary and tags for database search.
-Return ONLY valid JSON with two keys:
-- summaryEnglish: string (2-3 sentence summary in English, for search_summary_english column)
+    const prompt = `You are an AI golf coach. The following is a Finnish golf practice note (Long Game, Short Game, Putting, or Coach's Advice). Do two things:
+
+1) Produce a short English summary and tags for database search.
+2) Suggest the best YouTube tutorial for this topic: either a direct video URL (prefer trusted channels like Meandmygolf, TopSpeedGolf, Rick Shiels, or similar) or a YouTube search URL (https://www.youtube.com/results?search_query=...). The suggestion can be in English for better quality. Use a concrete search term (e.g. "golf slice fix", "putting alignment drill").
+
+Return ONLY valid JSON with three keys:
+- summaryEnglish: string (2-3 sentence summary in English)
 - tags: string[] (short English tags, e.g. ["putting", "alignment", "grip"])
+- suggestedVideoUrl: string (one full URL: either https://www.youtube.com/watch?v=... or https://www.youtube.com/results?search_query=...)
+
 Note:\n${notes.trim().slice(0, 2000)}`;
 
     const result = await model.generateContent(prompt);
@@ -144,10 +152,16 @@ Note:\n${notes.trim().slice(0, 2000)}`;
       const parsed = JSON.parse(text.replace(/^```json?\s*|\s*```$/g, "")) as {
         summaryEnglish?: string;
         tags?: string[];
+        suggestedVideoUrl?: string;
       };
+      const url =
+        typeof parsed.suggestedVideoUrl === "string" && parsed.suggestedVideoUrl.startsWith("http")
+          ? parsed.suggestedVideoUrl.trim()
+          : undefined;
       return {
         summaryEnglish: parsed.summaryEnglish ?? "",
         tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+        ...(url && { suggestedVideoUrl: url }),
       };
     } catch {
       if (text) return { summaryEnglish: text, tags: [] };
@@ -206,7 +220,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalyzeSe
     let notesResult: AnalyzeSessionNotesResult | undefined;
     if (notesText) {
       const res = await optimizeNotesForSearch(notesText);
-      if (res.summaryEnglish) notesResult = res;
+      if (res.summaryEnglish || res.suggestedVideoUrl) notesResult = res;
     }
 
     return NextResponse.json({

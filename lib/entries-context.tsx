@@ -53,7 +53,11 @@ export function EntriesProvider({ children }: { children: React.ReactNode }) {
     fetch("/api/cures-feels/priority", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ entryId, priority: newPriority }),
+      body: JSON.stringify({
+        entryId,
+        priority: newPriority,
+        ...(entry?.suggestedVideoUrl && { suggestedVideoUrl: entry.suggestedVideoUrl }),
+      }),
     })
       .then((res) => res.json())
       .then((data: { success?: boolean }) => {
