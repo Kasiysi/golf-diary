@@ -46,13 +46,12 @@ export async function PATCH(request: NextRequest): Promise<NextResponse<{ succes
     const user = await getServerUser();
     const userId = user?.id ?? FALLBACK_USER_ID_FOR_DEV;
 
-    const updatePayload: { is_priority: boolean; suggested_video_url?: string } = { is_priority: priority };
-    if (suggestedVideoUrl !== undefined) updatePayload.suggested_video_url = suggestedVideoUrl;
+    const updatePayload = { is_priority: priority, ...(suggestedVideoUrl !== undefined && { suggested_video_url: suggestedVideoUrl }) };
 
     if (cureId) {
       const { error: err } = await supabase
         .from("cures_feels")
-        // @ts-ignore - Vercel build: update() inferred as never
+        // @ts-ignore - Vercel build: update() param inferred as never
         .update(updatePayload as any)
         .eq("id", cureId)
         .eq("user_id", userId);
@@ -66,7 +65,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse<{ succes
     // Update by entry_id
     const { data: updated, error: updateErr } = await supabase
       .from("cures_feels")
-      // @ts-ignore - Vercel build: update() inferred as never
+      // @ts-ignore - Vercel build: update() param inferred as never
       .update(updatePayload as any)
       .eq("entry_id", entryId!)
       .eq("user_id", userId)

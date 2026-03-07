@@ -143,12 +143,12 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0 max-h-[90dvh] sm:max-h-[85vh]">
+      <DialogContent className="p-0 h-[90dvh] max-h-[90dvh] sm:h-[85vh] sm:max-h-[85vh]">
         <DialogHeader className="p-6 pb-2 shrink-0">
           <DialogTitle>{isEditing ? "Edit Entry" : "Quick Add Entry"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmitWithAiSummary} className="flex flex-col flex-1 min-h-0">
-          <div className="overflow-y-auto overflow-x-hidden flex-1 px-6 space-y-4 min-h-0 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+          <div className="overflow-y-auto overflow-x-hidden flex-1 px-6 space-y-4 min-h-0 overscroll-contain pb-4" style={{ WebkitOverflowScrolling: "touch" }}>
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Date</label>
             <input
@@ -286,11 +286,11 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
             )}
           </div>
           </div>
-          <DialogFooter className="p-6 pt-4 shrink-0 border-t border-[var(--border)] bg-[var(--background-muted)]">
+          <DialogFooter className="p-6 pt-4 shrink-0 border-t border-[var(--border)] bg-[var(--background-muted)] safe-area-pb">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={submitting}>
+            <Button type="submit" disabled={submitting} aria-label={isEditing ? "Save entry" : "Add entry"}>
               {submitting ? "Saving…" : isEditing ? "Save" : "Add Entry"}
             </Button>
           </DialogFooter>
