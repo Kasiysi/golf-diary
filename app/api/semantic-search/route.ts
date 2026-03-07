@@ -1,8 +1,8 @@
 /**
  * POST /api/semantic-search
  *
- * Vector search: embed query with Gemini text-embedding-004 (embedContent API), then match via Supabase RPC.
- * Uses REST models/{model}:embedContent (same as model.embedContent(); @google/generative-ai has no embed API).
+ * Vector search: embed query with Gemini embedding-001 (embedContent API), then match via Supabase RPC.
+ * Uses REST models/embedding-001:embedContent (same as model.embedContent(query); @google/generative-ai has no embed API).
  * GOOGLE_GENERATIVE_AI_API_KEY; outputDimensionality 1536. Errors from Gemini are returned in JSON for client (e.g. iPhone).
  * Body: { q: string, limit?: number }
  */
@@ -32,14 +32,14 @@ export interface SemanticSearchResponse {
 type EmbeddingResult = { ok: true; values: number[] } | { ok: false; error: string };
 
 /**
- * Get embedding via Gemini embedContent API (text-embedding-004).
- * Uses REST :embedContent endpoint; apiKey read inside request handler.
+ * Get embedding via Gemini embedContent API (embedding-001).
+ * Uses REST models/embedding-001:embedContent; apiKey read inside request handler.
  * outputDimensionality 1536 to match Supabase vector columns.
  */
 async function getEmbedding(
   text: string,
   apiKey: string,
-  model: string = "text-embedding-004"
+  model: string = "embedding-001"
 ): Promise<EmbeddingResult> {
   if (!apiKey || !text.trim()) {
     return { ok: false, error: "GOOGLE_GENERATIVE_AI_API_KEY is missing or empty." };
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SemanticS
     // Initialize env only inside POST so process.env is loaded in serverless
     const geminiKeyRaw = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     const apiKey = typeof geminiKeyRaw === "string" ? geminiKeyRaw.trim() : "";
-    const model = "text-embedding-004";
+    const model = "embedding-001";
 
     const body = await request.json().catch(() => ({}));
     const q = typeof body.q === "string" ? body.q.trim() : "";
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SemanticS
       return NextResponse.json({ matches: [], source: "none" });
     }
 
-    // embedContent(query) via REST (text-embedding-004); SDK has no embed API
+    // embedContent(query) via REST (embedding-001); SDK has no embed API
     const embedResult = await getEmbedding(q, apiKey, model);
 
     if (!embedResult.ok) {

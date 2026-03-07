@@ -83,7 +83,7 @@ export function EntryCard({
   const openQuickAdd = useOpenQuickAdd();
   const togglePriority = useTogglePriority();
   const deleteEntry = useDeleteEntry();
-  const clubLabel = CLUB_CATEGORIES.find((c) => c.value === entry.club)?.label ?? entry.club;
+  const clubLabel = CLUB_CATEGORIES.find((c) => c.value === entry?.club)?.label ?? entry?.club ?? "";
   const typeLabel = ENTRY_TYPES.find((t) => t.value === entry.entryType)?.label ?? entry.entryType;
   const swingPhaseLabel =
     entry.swingPhase && entry.swingPhase !== "none"

@@ -106,7 +106,7 @@ export function QuickCheckDashboard() {
               <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
                 #{i + 1}
               </span>
-              {item.club && (
+              {item?.club != null && item.club !== "" && (
                 <span className="inline-flex rounded-md bg-[var(--accent)]/15 px-2 py-0.5 text-[10px] font-medium text-[var(--accent)] uppercase">
                   {categoryLabel(item.club)}
                 </span>
