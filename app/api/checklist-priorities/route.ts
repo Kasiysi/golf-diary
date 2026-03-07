@@ -2,7 +2,7 @@
  * GET /api/checklist-priorities
  *
  * Returns Top 3 (or N) priority cures/feels for the Quick-Check Dashboard.
- * Uses Supabase when configured; requires auth. Until then returns empty array.
+ * Reads from cures_feels (instruction, instruction_english). Only rows with is_priority = true.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ChecklistP
       return NextResponse.json({ items: [] });
     }
 
-    // cures_feels: use instruction/instruction_english (you added these); fallback to content/content_english if present
+    // cures_feels: instruction, instruction_english; only is_priority = true
     const { data, error } = await supabase
       .from("cures_feels")
       .select("id, instruction, instruction_english, type, created_at")

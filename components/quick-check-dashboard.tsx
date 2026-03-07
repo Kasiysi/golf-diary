@@ -20,6 +20,7 @@ export function QuickCheckDashboard() {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    // API returns cures_feels where is_priority = true (instruction / instruction_english)
     fetch("/api/checklist-priorities?limit=3")
       .then((res) => res.json())
       .then((data: { items?: ChecklistPriorityItem[]; error?: string }) => {
