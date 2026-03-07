@@ -78,7 +78,7 @@ export default function ManageChecklistPage() {
           {items.map((item) => (
             <li
               key={item.id}
-              className="rounded-xl border border-[var(--border)] bg-white shadow-[var(--shadow)] p-4 flex flex-col gap-2"
+              className="rounded-xl border border-[var(--border)] bg-white shadow-[var(--shadow-sm)] p-4 flex flex-col gap-2"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">

@@ -10,6 +10,7 @@ import { FABWrapper } from "@/components/fab-wrapper";
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
+  weight: ["400", "500", "700"],
   display: "swap",
 });
 

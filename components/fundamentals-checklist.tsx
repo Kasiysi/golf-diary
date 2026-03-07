@@ -31,7 +31,7 @@ export function FundamentalsChecklist() {
   if (items.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-white shadow-[var(--shadow)] overflow-hidden">
+    <div className="rounded-2xl border border-[var(--border)] bg-white shadow-[var(--shadow-sm)] overflow-hidden">
       <div className="flex items-center justify-between">
         <button
           type="button"

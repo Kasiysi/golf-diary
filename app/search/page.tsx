@@ -85,7 +85,7 @@ function SearchContent() {
         ) : (
           <>
             {semanticLoading && (
-              <div className="rounded-xl border border-[var(--border)] bg-white shadow-[var(--shadow)] p-4 text-center text-sm text-[var(--muted-foreground)]">
+              <div className="rounded-xl border border-[var(--border)] bg-white shadow-[var(--shadow-sm)] p-4 text-center text-sm text-[var(--muted-foreground)]">
                 Semantic search…
               </div>
             )}
@@ -150,7 +150,7 @@ function SearchContent() {
                   {filtered.slice(0, 20).map((entry) => (
                     <li
                       key={entry.id}
-                      className="rounded-xl border border-[var(--border)] bg-white shadow-[var(--shadow)] p-3 text-sm text-[var(--foreground)]"
+                      className="rounded-xl border border-[var(--border)] bg-white shadow-[var(--shadow-sm)] p-3 text-sm text-[var(--foreground)]"
                     >
                       {entry.notes || entry.problemNotes || entry.cure || "—"}
                     </li>

@@ -148,7 +148,7 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
           <DialogTitle>{isEditing ? "Edit Entry" : "Quick Add Entry"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmitWithAiSummary} className="flex flex-col flex-1 min-h-0">
-          <div className="overflow-y-auto flex-1 px-6 space-y-4 min-h-0">
+          <div className="overflow-y-auto overflow-x-hidden flex-1 px-6 space-y-4 min-h-0 overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
           <div className="space-y-2">
             <label className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Date</label>
             <input

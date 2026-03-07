@@ -1,6 +1,6 @@
 /**
  * POST /api/semantic-search
- * Vector search: embed query with Gemini (embedding-001), then match via Supabase RPC.
+ * Vector search: embed query with Gemini embedding-001 (required for search to work).
  * Supabase keys are read at request time to avoid "not configured" errors.
  */
 

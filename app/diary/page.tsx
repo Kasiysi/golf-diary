@@ -55,7 +55,7 @@ export default function DiaryPage() {
                 <Link
                   key={value}
                   href={`/club/${value}`}
-                  className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-[var(--foreground)] font-medium shadow-[var(--shadow)] hover:shadow-[var(--shadow-md)] hover:border-[var(--accent)]/30 hover:bg-[var(--accent)]/5 transition-all min-h-[3.5rem]"
+                  className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-[var(--foreground)] font-medium shadow-[var(--shadow-sm)] hover:border-[var(--accent)]/30 hover:bg-[var(--accent)]/5 transition-all min-h-[3.5rem]"
                 >
                   {Icon && <Icon className="h-6 w-6 text-[var(--accent)] shrink-0" />}
                   <span className="truncate">{label}</span>

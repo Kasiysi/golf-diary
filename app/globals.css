@@ -1,22 +1,22 @@
 @import "tailwindcss";
 
-/* The Masters–inspired light theme: white/light bg, deep green accent, classic serif titles */
+/* Masters white theme: pure white backgrounds, Montserrat body, serif only for "Golf Diary" */
 :root {
   --background: #FFFFFF;
-  --background-muted: #F5F5F4;
+  --background-muted: #FFFFFF;
   --foreground: #1a1a1a;
   --card: #FFFFFF;
   --card-foreground: #1a1a1a;
   --border: #e5e5e4;
-  --muted: #fafaf9;
+  --muted: #fafafa;
   --muted-foreground: #6b7280;
   --accent: #006747;
   --accent-foreground: #ffffff;
   --ring: #006747;
   --heading: #006747;
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-md: 0 1px 3px 0 rgb(0 0 0 / 0.06);
 }
 
 @theme inline {
@@ -37,10 +37,10 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Masters-style cards: white, subtle border, soft shadow */
+/* Cards: pure white, subtle shadow-sm only */
 .glass {
   background: var(--card);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
 }

@@ -194,7 +194,7 @@ export function EntryCard({
   return (
     <article
       className={cn(
-        "rounded-xl overflow-hidden bg-white border border-[var(--border)] shadow-[var(--shadow)] hover:shadow-[var(--shadow-md)] transition-shadow",
+        "rounded-xl overflow-hidden bg-white border border-[var(--border)] shadow-[var(--shadow-sm)] transition-shadow",
         compact ? "p-3" : "p-4"
       )}
     >
