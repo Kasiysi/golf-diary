@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import type { DiaryEntry } from "./types";
 import { getEntries as loadEntries, addEntry as persistEntry, updateEntry as persistUpdateEntry, togglePriority as persistTogglePriority, deleteEntry as persistDeleteEntry } from "./store";
 
@@ -17,6 +18,7 @@ const EntriesContext = createContext<EntriesContextValue | null>(null);
 
 export function EntriesProvider({ children }: { children: React.ReactNode }) {
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
+  const router = useRouter();
 
   const refresh = useCallback(() => {
     setEntries(loadEntries());
@@ -70,10 +72,11 @@ export function EntriesProvider({ children }: { children: React.ReactNode }) {
       .then((data: { success?: boolean }) => {
         if (data.success && typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("checklist-priorities-refresh"));
+          router.refresh();
         }
       })
       .catch(() => {});
-  }, []);
+  }, [router]);
 
   const deleteEntry = useCallback((entryId: string) => {
     persistDeleteEntry(entryId);

@@ -21,7 +21,7 @@ export function QuickCheckDashboard() {
   const fetchPriorities = useCallback(() => {
     setLoading(true);
     setError(null);
-    fetch("/api/checklist-priorities?limit=3")
+    fetch("/api/checklist-priorities?limit=3", { cache: "no-store" })
       .then((res) => res.json())
       .then((data: { items?: ChecklistPriorityItem[]; error?: string }) => {
         if (data.error) setError(data.error);
@@ -37,10 +37,15 @@ export function QuickCheckDashboard() {
     const onRefresh = () => {
       if (!cancelled) fetchPriorities();
     };
+    const onVisibilityChange = () => {
+      if (!cancelled && document.visibilityState === "visible") fetchPriorities();
+    };
     window.addEventListener("checklist-priorities-refresh", onRefresh);
+    document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
       cancelled = true;
       window.removeEventListener("checklist-priorities-refresh", onRefresh);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [fetchPriorities]);
 
