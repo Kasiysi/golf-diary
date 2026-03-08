@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -44,12 +44,28 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
   const [uploadedMedia, setUploadedMedia] = useState<MediaItem[]>([]);
   const [entryDate, setEntryDate] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const submitGuardRef = useRef(false);
 
-  const isEditing = Boolean(initialEntry?.id);
-  const isProblemType = entryType === "problem";
+  const resetForm = () => {
+    setClub("");
+    setSwingPhase("none");
+    setEntryType("");
+    setNotes("");
+    setProblemNotes("");
+    setCure("");
+    setYoutubeLink("");
+    setUploadedMedia([]);
+    setEntryDate("");
+    setSubmitting(false);
+    submitGuardRef.current = false;
+  };
 
   useEffect(() => {
-    if (open && initialEntry) {
+    if (!open) {
+      resetForm();
+      return;
+    }
+    if (initialEntry) {
       setClub(initialEntry.club);
       setSwingPhase(initialEntry.swingPhase ?? "none");
       setEntryType(initialEntry.entryType);
@@ -57,9 +73,9 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
       setProblemNotes(initialEntry.problemNotes ?? "");
       setCure(initialEntry.cure ?? "");
       setYoutubeLink(initialEntry.youtubeLink ?? "");
-      setUploadedMedia(initialEntry.media);
+      setUploadedMedia(initialEntry.media ?? []);
       setEntryDate(initialEntry.createdAt.slice(0, 10));
-    } else if (open && !initialEntry) {
+    } else {
       setClub("");
       setSwingPhase("none");
       setEntryType("");
@@ -72,10 +88,14 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
     }
   }, [open, initialEntry]);
 
+  const isEditing = Boolean(initialEntry?.id);
+  const isProblemType = entryType === "problem";
+
   const handleSubmitWithAiSummary = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!club || !entryType || submitting) return;
-
+    if (submitGuardRef.current) return;
+    submitGuardRef.current = true;
     setSubmitting(true);
     try {
       const combinedNote =
@@ -128,15 +148,7 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
         addEntry({ ...payload, createdAt: createdAtISO ?? new Date().toISOString() });
       }
 
-      setClub("");
-      setSwingPhase("none");
-      setEntryType("");
-      setNotes("");
-      setProblemNotes("");
-      setCure("");
-      setYoutubeLink("");
-      setUploadedMedia([]);
-      setEntryDate("");
+      resetForm();
       onOpenChange(false);
       router.push("/diary");
       router.refresh();
@@ -145,6 +157,7 @@ export function QuickAddDialog({ open, onOpenChange, initialEntry }: Props) {
       if (typeof window !== "undefined") alert(message);
     } finally {
       setSubmitting(false);
+      submitGuardRef.current = false;
     }
   };
 

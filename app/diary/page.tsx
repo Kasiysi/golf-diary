@@ -6,8 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEntries } from "@/lib/entries-context";
 import { EntryCard } from "@/components/entry-card";
 import { VideoPlayerModal } from "@/components/video-player-modal";
+import { EntryDetailModal } from "@/components/entry-detail-modal";
 import { CLUB_CATEGORIES } from "@/lib/constants";
-import { BookOpen, Crosshair, Target, Circle, MessageCircle } from "lucide-react";
+import { BookOpen, Crosshair, Target, Circle, MessageCircle, Dumbbell } from "lucide-react";
+import type { DiaryEntry } from "@/lib/types";
 
 const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   "long-game": Crosshair,
@@ -19,12 +21,16 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
 export default function DiaryPage() {
   const entries = useEntries();
   const [videoModalUrl, setVideoModalUrl] = useState<string | null>(null);
+  const [detailEntry, setDetailEntry] = useState<DiaryEntry | null>(null);
 
   const categoryFilter = (slug: string) =>
     entries.filter((e) => e.club === slug);
   const chronologicalEntries = [...entries].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
+  const newestDrill = [...entries]
+    .filter((e) => e.entryType === "drill")
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] ?? null;
 
   return (
     <motion.div
@@ -43,6 +49,22 @@ export default function DiaryPage() {
       </header>
 
       <div className="p-4 md:p-6 space-y-6">
+        {newestDrill && (
+          <section>
+            <Link
+              href="/next-session-drill"
+              className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[var(--accent)] hover:underline mb-2"
+            >
+              <Dumbbell className="h-4 w-4" />
+              Next Session Drill
+            </Link>
+            <EntryCard
+              entry={newestDrill}
+              onVideoClick={(url) => setVideoModalUrl(url)}
+              onEntryClick={(e) => setDetailEntry(e)}
+            />
+          </section>
+        )}
         <section>
           <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)] mb-3">
             Categories
@@ -97,6 +119,9 @@ export default function DiaryPage() {
                     <EntryCard
                       entry={entry}
                       onVideoClick={(url) => setVideoModalUrl(url)}
+                      onEntryClick={(e) => {
+                        setDetailEntry(e);
+                      }}
                     />
                   </motion.li>
                 ))}
@@ -109,6 +134,16 @@ export default function DiaryPage() {
           url={videoModalUrl}
           open={videoModalUrl !== null}
           onOpenChange={(open) => !open && setVideoModalUrl(null)}
+        />
+
+        <EntryDetailModal
+          entry={detailEntry}
+          open={detailEntry !== null}
+          onOpenChange={(open) => !open && setDetailEntry(null)}
+          onVideoClick={(url) => {
+            setDetailEntry(null);
+            setVideoModalUrl(url);
+          }}
         />
       </div>
     </motion.div>

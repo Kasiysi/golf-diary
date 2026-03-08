@@ -13,6 +13,7 @@ import {
   Target,
   Circle,
   MessageCircle,
+  Dumbbell,
 } from "lucide-react";
 import { CLUB_CATEGORIES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,8 @@ const categoryIconMap: Record<string, React.ComponentType<{ className?: string }
   putting: Circle,
   "coach-advice": MessageCircle,
 };
+
+const nextSessionDrillLink = { href: "/next-session-drill", label: "Next Session Drill", icon: Dumbbell };
 
 const globalSections = [
   { href: "/priorities", label: "Priorities", icon: Star },
@@ -81,6 +84,18 @@ export function Sidebar() {
         <p className="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-[var(--muted-foreground)]">
           Categories
         </p>
+        <Link
+          href={nextSessionDrillLink.href}
+          className={cn(
+            "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors border border-transparent",
+            pathname === nextSessionDrillLink.href
+              ? "bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/30"
+              : "text-[var(--foreground)] hover:bg-[var(--muted)] border-transparent"
+          )}
+        >
+          <Dumbbell className="h-5 w-5 shrink-0" />
+          {nextSessionDrillLink.label}
+        </Link>
         {CLUB_CATEGORIES.map(({ value, label }) => {
           const Icon = categoryIconMap[value];
           const href = `/club/${value}`;

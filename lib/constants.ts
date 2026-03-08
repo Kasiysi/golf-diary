@@ -24,6 +24,7 @@ export const ENTRY_TYPES: { value: EntryType; label: string }[] = [
 
 export const NAV_ITEMS = [
   { href: "/", label: "Diary", icon: "BookOpen" },
+  { href: "/next-session-drill", label: "Next Session Drill", slug: "next-session-drill" },
   ...CLUB_CATEGORIES.map((c) => ({
     href: `/club/${c.value}`,
     label: c.label,

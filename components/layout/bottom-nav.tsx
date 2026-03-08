@@ -10,6 +10,7 @@ import {
   MessageCircle,
   MessageSquare,
   Star,
+  Dumbbell,
 } from "lucide-react";
 import { CLUB_CATEGORIES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 const mobileNavItems = [
   { href: "/diary", label: "Diary", icon: BookOpen },
+  { href: "/next-session-drill", label: "Next Drill", icon: Dumbbell },
   ...CLUB_CATEGORIES.map((c) => ({
     href: `/club/${c.value}`,
     label: c.label,

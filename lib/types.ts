@@ -37,5 +37,9 @@ export interface DiaryEntry {
   searchSummaryEnglish?: string | null;
   /** AI Coach: suggested YouTube tutorial URL (from Gemini when analyzing Finnish notes) */
   suggestedVideoUrl?: string | null;
+  /** Display title / instruction (e.g. from checklist or AI summary) */
+  instruction?: string | null;
+  /** English version of instruction */
+  instruction_english?: string | null;
   createdAt: string;
 }

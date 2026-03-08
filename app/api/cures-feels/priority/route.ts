@@ -51,7 +51,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse<{ succes
     if (cureId) {
       const { error: err } = await supabase
         .from("cures_feels")
-        // @ts-ignore - Vercel build: update() param inferred as never
+        // @ts-expect-error - Supabase generated types: update() param inferred as never; payload is valid
         .update(updatePayload as any)
         .eq("id", cureId)
         .eq("user_id", userId);
@@ -65,7 +65,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse<{ succes
     // Update by entry_id
     const { data: updated, error: updateErr } = await supabase
       .from("cures_feels")
-      // @ts-ignore - Vercel build: update() param inferred as never
+      // @ts-expect-error - Supabase generated types: update() param inferred as never; payload is valid
       .update(updatePayload as any)
       .eq("entry_id", entryId!)
       .eq("user_id", userId)

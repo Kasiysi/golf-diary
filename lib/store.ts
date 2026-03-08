@@ -125,6 +125,10 @@ export function getEntriesByClub(club: DiaryEntry["club"]): DiaryEntry[] {
   return loadEntries().filter((e) => e.club === club);
 }
 
+export function getEntryById(id: string): DiaryEntry | null {
+  return loadEntries().find((e) => e.id === id) ?? null;
+}
+
 export function getAllMediaForClub(club: DiaryEntry["club"]): MediaItem[] {
   return loadEntries()
     .filter((e) => e.club === club)

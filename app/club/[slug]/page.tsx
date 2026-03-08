@@ -8,6 +8,7 @@ import { CLUB_CATEGORIES, ENTRY_TYPES } from "@/lib/constants";
 import type { ClubCategory, EntryType } from "@/lib/types";
 import { EntryCard } from "@/components/entry-card";
 import { VideoPlayerModal } from "@/components/video-player-modal";
+import { ImageLightbox } from "@/components/image-lightbox";
 import {
   Heart,
   AlertCircle,
@@ -30,6 +31,7 @@ export default function ClubPage() {
   const slug = params.slug as string;
   const entries = useEntries();
   const [videoModalUrl, setVideoModalUrl] = useState<string | null>(null);
+  const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
 
   const club = CLUB_CATEGORIES.find((c) => c.value === slug);
   if (!club) {
@@ -100,11 +102,17 @@ export default function ClubPage() {
                   key={m.id}
                   className={cn(
                     "aspect-square rounded-lg border border-[var(--border)] bg-[var(--muted)] overflow-hidden relative",
-                    m.type === "video" && "cursor-pointer"
+                    (m.type === "video" || m.type === "image") && "cursor-pointer"
                   )}
-                  role={m.type === "video" ? "button" : undefined}
-                  tabIndex={m.type === "video" ? 0 : undefined}
-                  onClick={m.type === "video" ? () => setVideoModalUrl(m.url) : undefined}
+                  role={(m.type === "video" || m.type === "image") ? "button" : undefined}
+                  tabIndex={(m.type === "video" || m.type === "image") ? 0 : undefined}
+                  onClick={
+                    m.type === "video"
+                      ? () => setVideoModalUrl(m.url)
+                      : m.type === "image" && (m.url.startsWith("https://utfs.io") || m.url.startsWith("data:") || m.url.startsWith("http") || m.url.startsWith("/"))
+                        ? () => setLightboxImageUrl(m.url)
+                        : undefined
+                  }
                   onKeyDown={
                     m.type === "video"
                       ? (e) => {
@@ -113,7 +121,14 @@ export default function ClubPage() {
                             setVideoModalUrl(m.url);
                           }
                         }
-                      : undefined
+                      : m.type === "image"
+                        ? (e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setLightboxImageUrl(m.url);
+                            }
+                          }
+                        : undefined
                   }
                 >
                   {m.type === "video" ? (
@@ -170,6 +185,12 @@ export default function ClubPage() {
           url={videoModalUrl}
           open={videoModalUrl !== null}
           onOpenChange={(open) => !open && setVideoModalUrl(null)}
+        />
+
+        <ImageLightbox
+          imageUrl={lightboxImageUrl}
+          open={lightboxImageUrl !== null}
+          onOpenChange={(open) => !open && setLightboxImageUrl(null)}
         />
 
         {clubEntries.length === 0 && (

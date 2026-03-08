@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import type { DiaryEntry, EntryType } from "@/lib/types";
 import { CLUB_CATEGORIES, ENTRY_TYPES, SWING_PHASES } from "@/lib/constants";
@@ -16,6 +17,7 @@ import {
 import { cn, getYouTubeVideoId } from "@/lib/utils";
 import { useOpenQuickAdd } from "@/lib/quick-add-context";
 import { useTogglePriority, useDeleteEntry } from "@/lib/entries-context";
+import { ImageLightbox } from "@/components/image-lightbox";
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -75,11 +77,14 @@ export function EntryCard({
   entry,
   compact = false,
   onVideoClick,
+  onEntryClick,
 }: {
   entry: DiaryEntry;
   compact?: boolean;
   onVideoClick?: (url: string) => void;
+  onEntryClick?: (entry: DiaryEntry) => void;
 }) {
+  const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
   const openQuickAdd = useOpenQuickAdd();
   const togglePriority = useTogglePriority();
   const deleteEntry = useDeleteEntry();
@@ -193,11 +198,30 @@ export function EntryCard({
   );
 
   return (
-    <article
+    <>
+      <article
       className={cn(
         "rounded-xl overflow-hidden bg-white border border-[var(--border)] shadow-[var(--shadow-sm)] transition-shadow",
-        compact ? "p-3" : "p-4"
+        compact ? "p-3" : "p-4",
+        onEntryClick && "cursor-pointer hover:shadow-md"
       )}
+      onClick={(e) => {
+        if (onEntryClick && !(e.target as HTMLElement).closest("button")) {
+          onEntryClick(entry);
+        }
+      }}
+      role={onEntryClick ? "button" : undefined}
+      tabIndex={onEntryClick ? 0 : undefined}
+      onKeyDown={
+        onEntryClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onEntryClick(entry);
+              }
+            }
+          : undefined
+      }
     >
       <div className="flex items-start gap-3">
         {firstMedia?.type === "video" && onVideoClick ? (
@@ -206,6 +230,15 @@ export function EntryCard({
             onClick={() => onVideoClick(firstMedia.url)}
             className={cn(thumbContainerClass, "focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2 focus:ring-offset-white")}
             aria-label="Play swing video"
+          >
+            {mediaThumb}
+          </button>
+        ) : firstMedia?.type === "image" && imageUrl ? (
+          <button
+            type="button"
+            onClick={() => setLightboxImageUrl(imageUrl)}
+            className={cn(thumbContainerClass, "cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2 focus:ring-offset-white")}
+            aria-label="Enlarge image"
           >
             {mediaThumb}
           </button>
@@ -327,6 +360,12 @@ export function EntryCard({
           )}
         </div>
       </div>
-    </article>
+      </article>
+      <ImageLightbox
+        imageUrl={lightboxImageUrl}
+        open={lightboxImageUrl !== null}
+        onOpenChange={(open) => !open && setLightboxImageUrl(null)}
+      />
+    </>
   );
 }
