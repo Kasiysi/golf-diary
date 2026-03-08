@@ -41,7 +41,7 @@ function entryLabel(entry: DiaryEntry): string {
 /** Custom node: white, rounded, Montserrat; border by type (Problem=red, Drill/Coach=green, Feel=blue). */
 function EntryNode({ data, selected }: NodeProps<{ entry: DiaryEntry; label: string }>) {
   const entryType = data.entry?.entryType ?? "feel";
-  const borderClass = NODE_BORDER[entryType] ?? "border-[var(--border)]";
+  const borderClass = NODE_BORDER[entryType] ?? "border-[var(--accent)]";
   return (
     <div
       className={cn(
@@ -65,8 +65,13 @@ export default function GameMapPage() {
   const [connectionSource, setConnectionSource] = useState<string | null>(null);
   const [connectionVersion, setConnectionVersion] = useState(0);
 
+  // Data: from useEntries() (local store; syncs with diary). For cures_feels DB, add an API and merge/fetch here.
   const entries = useEntries();
   const openEntryDetail = useEntryDetail()?.openEntryDetail;
+
+  if (typeof window !== "undefined") {
+    console.log("Entries:", entries);
+  }
 
   const { initialNodes, initialEdges } = useMemo(() => {
     const sortNewestFirst = (a: DiaryEntry, b: DiaryEntry) =>
@@ -194,6 +199,7 @@ export default function GameMapPage() {
       </header>
       <div className="flex-1 w-full h-[calc(100vh-7rem)] min-h-[400px]">
         <ReactFlow
+          key={nodes.length === 0 ? "flow-empty" : "flow-populated"}
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
