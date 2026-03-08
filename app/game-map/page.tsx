@@ -6,6 +6,7 @@ import ReactFlow, {
   type Edge,
   Background,
   Controls,
+  MiniMap,
   useNodesState,
   useEdgesState,
   type NodeProps,
@@ -59,11 +60,13 @@ function EntryNode({ data, selected }: NodeProps<{ entry: DiaryEntry; label: str
 const nodeTypes = { entry: EntryNode };
 
 export default function GameMapPage() {
-  const entries = useEntries();
-  const openEntryDetail = useEntryDetail()?.openEntryDetail;
+  // State declared first so connectionVersion is never used before definition (e.g. in useMemo deps)
   const [connectionMode, setConnectionMode] = useState(false);
   const [connectionSource, setConnectionSource] = useState<string | null>(null);
   const [connectionVersion, setConnectionVersion] = useState(0);
+
+  const entries = useEntries();
+  const openEntryDetail = useEntryDetail()?.openEntryDetail;
 
   const { initialNodes, initialEdges } = useMemo(() => {
     const sortNewestFirst = (a: DiaryEntry, b: DiaryEntry) =>
@@ -124,6 +127,7 @@ export default function GameMapPage() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   useEffect(() => {
+    // Populate map: sync all entries as nodes and connection-derived edges into React Flow state
     setNodes(initialNodes);
     setEdges(initialEdges);
   }, [initialNodes, initialEdges, setNodes, setEdges]);
@@ -203,6 +207,16 @@ export default function GameMapPage() {
         >
           <Background color="var(--border)" gap={16} size={1} />
           <Controls className="!border-[var(--border)] !bg-white !shadow-[var(--shadow-sm)]" />
+          <MiniMap
+            nodeColor={(node) => {
+              const type = (node.data as { entry?: DiaryEntry })?.entry?.entryType;
+              if (type === "problem") return "#ef4444";
+              if (type === "drill" || type === "coach-advice") return MASTERS_GREEN;
+              return "#3b82f6";
+            }}
+            maskColor="rgba(0,0,0,0.08)"
+            className="!border-[var(--border)] !bg-white !shadow-[var(--shadow-sm)]"
+          />
         </ReactFlow>
       </div>
     </div>
