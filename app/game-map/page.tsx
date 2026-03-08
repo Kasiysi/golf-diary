@@ -197,7 +197,7 @@ export default function GameMapPage() {
           <span>Feels</span>
         </div>
       </header>
-      <div className="flex-1 w-full h-[calc(100vh-7rem)] min-h-[400px]">
+      <div className="flex-1 w-full min-h-[500px] h-[calc(100vh-7rem)]">
         <ReactFlow
           key={nodes.length === 0 ? "flow-empty" : "flow-populated"}
           nodes={nodes}

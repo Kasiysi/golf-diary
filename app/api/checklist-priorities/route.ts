@@ -44,7 +44,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<ChecklistP
       .limit(limit);
 
     if (error) {
-      return NextResponse.json({ items: [], error: error.message });
+      return NextResponse.json({ items: [], error: error.message }, {
+        headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
+      });
     }
 
     type CureRow = {
@@ -67,9 +69,14 @@ export async function GET(request: NextRequest): Promise<NextResponse<ChecklistP
       suggestedVideoUrl: row.suggested_video_url ?? null,
     }));
 
-    return NextResponse.json({ items });
+    return NextResponse.json({ items }, {
+      headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
+    });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    return NextResponse.json({ items: [], error: message }, { status: 500 });
+    return NextResponse.json({ items: [], error: message }, {
+      status: 500,
+      headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
+    });
   }
 }

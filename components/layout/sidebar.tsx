@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { CLUB_CATEGORIES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { UserSessionInfo } from "@/components/user-session-info";
 
 const categoryIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   "long-game": Crosshair,
@@ -138,6 +139,7 @@ export function Sidebar() {
           </Link>
         ))}
       </nav>
+      <UserSessionInfo />
     </aside>
   );
 }

@@ -8,6 +8,7 @@ import { EntryCard } from "@/components/entry-card";
 import { VideoPlayerModal } from "@/components/video-player-modal";
 import { CLUB_CATEGORIES } from "@/lib/constants";
 import { BookOpen, Crosshair, Target, Circle, MessageCircle, Dumbbell } from "lucide-react";
+import { UserSessionInfo } from "@/components/user-session-info";
 
 const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   "long-game": Crosshair,
@@ -37,11 +38,12 @@ export default function DiaryPage() {
       transition={{ duration: 0.2 }}
     >
       <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-white shadow-sm">
-        <div className="flex h-14 items-center gap-3 px-4 md:px-6">
+        <div className="flex h-14 items-center justify-between gap-3 px-4 md:px-6">
           <h1 className="font-heading flex items-center gap-2 text-xl font-semibold shrink-0 text-[var(--heading)]">
             <BookOpen className="h-5 w-5 text-[var(--accent)]" />
             Diary
           </h1>
+          <UserSessionInfo compact />
         </div>
       </header>
 

@@ -57,6 +57,7 @@ export function EntriesProvider({ children }: { children: React.ReactNode }) {
     fetch("/api/cures-feels/priority", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
+      cache: "no-store",
       body: JSON.stringify({
         entryId,
         priority: newPriority,

@@ -35,7 +35,7 @@ export function getSupabaseServer() {
 /** Returns the current user from Supabase Auth cookies (session). Use in API routes and Server Components.
  * Reads session from request cookies so mobile and desktop browsers authenticate the same way.
  * When no session, returns null (callers may use FALLBACK_USER_ID_FOR_DEV for testing). */
-export async function getServerUser(): Promise<{ id: string } | null> {
+export async function getServerUser(): Promise<{ id: string; email?: string | null } | null> {
   const { url, anonKey } = getSupabaseEnv();
   if (!url || !anonKey) return null;
 
@@ -60,5 +60,5 @@ export async function getServerUser(): Promise<{ id: string } | null> {
   // getSession() reads from cookies and is reliable on mobile; getUser() uses the same session
   const { data: { session } } = await supabase.auth.getSession();
   const user = session?.user ?? null;
-  return user ? { id: user.id } : null;
+  return user ? { id: user.id, email: user.email ?? null } : null;
 }
