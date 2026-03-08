@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import ReactFlow, {
   type Node,
   type Edge,
@@ -12,10 +12,10 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { useEntries } from "@/lib/entries-context";
-import { getAllConnections } from "@/lib/entry-connections";
+import { getAllConnections, addConnection } from "@/lib/entry-connections";
 import { useEntryDetail } from "@/lib/entry-detail-context";
 import type { DiaryEntry } from "@/lib/types";
-import { Map } from "lucide-react";
+import { Map, Link2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const COLUMN_X = { left: 80, center: 340, right: 600 };
@@ -23,6 +23,12 @@ const ROW_HEIGHT = 72;
 const NODE_WIDTH = 200;
 const NODE_HEIGHT = 56;
 const MASTERS_GREEN = "#006747";
+const NODE_BORDER = {
+  problem: "border-red-500",
+  drill: "border-[var(--accent)]",
+  "coach-advice": "border-[var(--accent)]",
+  feel: "border-blue-500",
+} as const;
 
 function entryLabel(entry: DiaryEntry): string {
   const part1 = entry.instruction ?? (entry.entryType === "problem" && entry.problemNotes ? entry.problemNotes : entry.notes);
@@ -31,14 +37,17 @@ function entryLabel(entry: DiaryEntry): string {
   return String(text).slice(0, 50);
 }
 
-/** Custom node: white, rounded, Montserrat, Masters border. */
+/** Custom node: white, rounded, Montserrat; border by type (Problem=red, Drill/Coach=green, Feel=blue). */
 function EntryNode({ data, selected }: NodeProps<{ entry: DiaryEntry; label: string }>) {
+  const entryType = data.entry?.entryType ?? "feel";
+  const borderClass = NODE_BORDER[entryType] ?? "border-[var(--border)]";
   return (
     <div
       className={cn(
         "font-sans rounded-xl border-2 shadow-sm px-3 py-2 text-sm text-[var(--foreground)]",
-        "bg-white border-[var(--border)] min-w-[180px] max-w-[220px]",
-        selected && "border-[var(--accent)] ring-2 ring-[var(--accent)]/20"
+        "bg-white min-w-[180px] max-w-[220px]",
+        borderClass,
+        selected && "ring-2 ring-[var(--accent)]/40"
       )}
       style={{ width: NODE_WIDTH, minHeight: NODE_HEIGHT }}
     >
@@ -106,10 +115,13 @@ export default function GameMapPage() {
       }));
 
     return { initialNodes: nodes, initialEdges: edges };
-  }, [entries]);
+  }, [entries, connectionVersion]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [connectionMode, setConnectionMode] = useState(false);
+  const [connectionSource, setConnectionSource] = useState<string | null>(null);
+  const [connectionVersion, setConnectionVersion] = useState(0);
 
   useEffect(() => {
     setNodes(initialNodes);
@@ -118,20 +130,57 @@ export default function GameMapPage() {
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node<{ entry: DiaryEntry; label: string }>) => {
+      if (connectionMode) {
+        const id = node.id;
+        if (!connectionSource) {
+          setConnectionSource(id);
+          return;
+        }
+        if (connectionSource === id) return;
+        addConnection(connectionSource, id);
+        setConnectionVersion((v) => v + 1);
+        setConnectionSource(null);
+        return;
+      }
       const entry = node.data?.entry;
       if (entry && openEntryDetail) openEntryDetail(entry);
     },
-    [openEntryDetail]
+    [connectionMode, connectionSource, openEntryDetail]
   );
 
   return (
     <div className="min-h-screen bg-[var(--background)] flex flex-col">
       <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-white shadow-sm shrink-0">
-        <div className="flex h-14 items-center gap-3 px-4 md:px-6">
-          <Map className="h-5 w-5 text-[var(--accent)]" />
-          <h1 className="font-heading text-xl font-semibold text-[var(--heading)]">
-            Game Map
-          </h1>
+        <div className="flex h-14 items-center justify-between gap-3 px-4 md:px-6">
+          <div className="flex items-center gap-3">
+            <Map className="h-5 w-5 text-[var(--accent)]" />
+            <h1 className="font-heading text-xl font-semibold text-[var(--heading)]">
+              Game Map
+            </h1>
+          </div>
+          <div className="flex items-center gap-2">
+            {connectionMode && (
+              <span className="text-xs text-[var(--muted-foreground)]">
+                {connectionSource ? "Valitse toinen merkintä" : "Valitse ensimmäinen merkintä"}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setConnectionMode((m) => !m);
+                setConnectionSource(null);
+              }}
+              className={cn(
+                "p-2 rounded-lg border transition-colors",
+                connectionMode
+                  ? "bg-[var(--accent)] text-white border-[var(--accent)]"
+                  : "bg-white border-[var(--border)] hover:bg-[var(--muted)]"
+              )}
+              title={connectionMode ? "Sulje linkitystila" : "Luo linkitys"}
+            >
+              {connectionMode ? <X className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
         <div className="px-4 pb-2 flex items-center gap-4 text-xs text-[var(--muted-foreground)]">
           <span>Problems</span>
