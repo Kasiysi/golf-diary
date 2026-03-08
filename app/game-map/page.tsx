@@ -61,6 +61,9 @@ const nodeTypes = { entry: EntryNode };
 export default function GameMapPage() {
   const entries = useEntries();
   const openEntryDetail = useEntryDetail()?.openEntryDetail;
+  const [connectionMode, setConnectionMode] = useState(false);
+  const [connectionSource, setConnectionSource] = useState<string | null>(null);
+  const [connectionVersion, setConnectionVersion] = useState(0);
 
   const { initialNodes, initialEdges } = useMemo(() => {
     const sortNewestFirst = (a: DiaryEntry, b: DiaryEntry) =>
@@ -119,9 +122,6 @@ export default function GameMapPage() {
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [connectionMode, setConnectionMode] = useState(false);
-  const [connectionSource, setConnectionSource] = useState<string | null>(null);
-  const [connectionVersion, setConnectionVersion] = useState(0);
 
   useEffect(() => {
     setNodes(initialNodes);
