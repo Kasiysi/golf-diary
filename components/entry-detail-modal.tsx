@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { EntryDetailView } from "@/components/entry-detail-view";
 import type { DiaryEntry } from "@/lib/types";
-import { X, ExternalLink, ArrowLeft } from "lucide-react";
+import { useEntries, useDeleteEntry } from "@/lib/entries-context";
+import { X, ExternalLink, ArrowLeft, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ConfirmDeleteEntryModal } from "@/components/confirm-delete-entry-modal";
 
 const ENTRY_MODAL_Z = "z-[200]";
 
@@ -23,6 +25,10 @@ export function EntryDetailModal({
   onOpenChange,
   onVideoClick,
 }: Props) {
+  const entries = useEntries();
+  const deleteEntry = useDeleteEntry();
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -71,6 +77,16 @@ export function EntryDetailModal({
                 <span className="hidden sm:inline">Avaa sivulla</span>
               </Link>
             ) : null}
+            {entry ? (
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmOpen(true)}
+                className="p-2 rounded-lg text-[var(--muted-foreground)] hover:bg-red-500/20 hover:text-red-500 transition-colors touch-manipulation"
+                aria-label="Delete entry"
+              >
+                <Trash2 className="h-5 w-5" />
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => onOpenChange(false)}
@@ -82,9 +98,23 @@ export function EntryDetailModal({
           </div>
         </div>
         {entry ? (
-          <EntryDetailView entry={entry} onVideoClick={onVideoClick} />
+          <EntryDetailView
+            entry={entry}
+            allEntries={entries}
+            onVideoClick={onVideoClick}
+          />
         ) : null}
       </DialogContent>
+      <ConfirmDeleteEntryModal
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        onConfirm={() => {
+          if (entry) {
+            deleteEntry(entry.id);
+            onOpenChange(false);
+          }
+        }}
+      />
     </Dialog>
   );
 }

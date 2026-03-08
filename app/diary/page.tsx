@@ -6,10 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEntries } from "@/lib/entries-context";
 import { EntryCard } from "@/components/entry-card";
 import { VideoPlayerModal } from "@/components/video-player-modal";
-import { EntryDetailModal } from "@/components/entry-detail-modal";
 import { CLUB_CATEGORIES } from "@/lib/constants";
 import { BookOpen, Crosshair, Target, Circle, MessageCircle, Dumbbell } from "lucide-react";
-import type { DiaryEntry } from "@/lib/types";
 
 const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   "long-game": Crosshair,
@@ -21,7 +19,6 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
 export default function DiaryPage() {
   const entries = useEntries();
   const [videoModalUrl, setVideoModalUrl] = useState<string | null>(null);
-  const [detailEntry, setDetailEntry] = useState<DiaryEntry | null>(null);
 
   const categoryFilter = (slug: string) =>
     entries.filter((e) => e.club === slug);
@@ -61,7 +58,6 @@ export default function DiaryPage() {
             <EntryCard
               entry={newestDrill}
               onVideoClick={(url) => setVideoModalUrl(url)}
-              onEntryClick={(e) => setDetailEntry(e)}
             />
           </section>
         )}
@@ -119,9 +115,6 @@ export default function DiaryPage() {
                     <EntryCard
                       entry={entry}
                       onVideoClick={(url) => setVideoModalUrl(url)}
-                      onEntryClick={(e) => {
-                        setDetailEntry(e);
-                      }}
                     />
                   </motion.li>
                 ))}
@@ -134,16 +127,6 @@ export default function DiaryPage() {
           url={videoModalUrl}
           open={videoModalUrl !== null}
           onOpenChange={(open) => !open && setVideoModalUrl(null)}
-        />
-
-        <EntryDetailModal
-          entry={detailEntry}
-          open={detailEntry !== null}
-          onOpenChange={(open) => !open && setDetailEntry(null)}
-          onVideoClick={(url) => {
-            setDetailEntry(null);
-            setVideoModalUrl(url);
-          }}
         />
       </div>
     </motion.div>

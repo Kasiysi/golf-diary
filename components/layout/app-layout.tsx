@@ -6,6 +6,7 @@ import { BottomNav } from "./bottom-nav";
 import { EntriesProvider } from "@/lib/entries-context";
 import { QuickAddProvider } from "@/lib/quick-add-context";
 import { FundamentalsProvider } from "@/lib/fundamentals-context";
+import { EntryDetailProvider } from "@/lib/entry-detail-context";
 
 function SidebarFallback() {
   return (
@@ -23,6 +24,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <EntriesProvider>
       <QuickAddProvider>
         <FundamentalsProvider>
+          <EntryDetailProvider>
           <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
             <div className="flex min-h-screen">
               <Suspense fallback={<SidebarFallback />}>
@@ -34,6 +36,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <BottomNav />
           </div>
+          </EntryDetailProvider>
         </FundamentalsProvider>
       </QuickAddProvider>
     </EntriesProvider>

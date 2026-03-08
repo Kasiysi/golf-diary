@@ -5,14 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEntries } from "@/lib/entries-context";
 import { EntryCard } from "@/components/entry-card";
 import { VideoPlayerModal } from "@/components/video-player-modal";
-import { EntryDetailModal } from "@/components/entry-detail-modal";
 import { Dumbbell } from "lucide-react";
-import type { DiaryEntry } from "@/lib/types";
 
 export default function NextSessionDrillPage() {
   const entries = useEntries();
   const [videoModalUrl, setVideoModalUrl] = useState<string | null>(null);
-  const [detailEntry, setDetailEntry] = useState<DiaryEntry | null>(null);
 
   const drillEntries = [...entries]
     .filter((e) => e.entryType === "drill")
@@ -65,7 +62,6 @@ export default function NextSessionDrillPage() {
                   <EntryCard
                     entry={newestDrill}
                     onVideoClick={(url) => setVideoModalUrl(url)}
-                    onEntryClick={(e) => setDetailEntry(e)}
                   />
                 </motion.div>
               </section>
@@ -89,7 +85,6 @@ export default function NextSessionDrillPage() {
                         <EntryCard
                           entry={entry}
                           onVideoClick={(url) => setVideoModalUrl(url)}
-                          onEntryClick={(e) => setDetailEntry(e)}
                         />
                       </motion.li>
                     ))}
@@ -105,15 +100,6 @@ export default function NextSessionDrillPage() {
         url={videoModalUrl}
         open={videoModalUrl !== null}
         onOpenChange={(open) => !open && setVideoModalUrl(null)}
-      />
-      <EntryDetailModal
-        entry={detailEntry}
-        open={detailEntry !== null}
-        onOpenChange={(open) => !open && setDetailEntry(null)}
-        onVideoClick={(url) => {
-          setDetailEntry(null);
-          setVideoModalUrl(url);
-        }}
       />
     </motion.div>
   );

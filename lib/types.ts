@@ -43,3 +43,11 @@ export interface DiaryEntry {
   instruction_english?: string | null;
   createdAt: string;
 }
+
+/** A link from one entry to another (e.g. Problem -> Drill). Stored in entry_connections. */
+export interface EntryConnection {
+  id: string;
+  entryId: string;
+  linkedEntryId: string;
+  createdAt: string;
+}

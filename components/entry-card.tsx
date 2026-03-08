@@ -17,7 +17,9 @@ import {
 import { cn, getYouTubeVideoId } from "@/lib/utils";
 import { useOpenQuickAdd } from "@/lib/quick-add-context";
 import { useTogglePriority, useDeleteEntry } from "@/lib/entries-context";
+import { useOpenEntryDetail } from "@/lib/entry-detail-context";
 import { ImageLightbox } from "@/components/image-lightbox";
+import { ConfirmDeleteEntryModal } from "@/components/confirm-delete-entry-modal";
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -85,9 +87,11 @@ export function EntryCard({
   onEntryClick?: (entry: DiaryEntry) => void;
 }) {
   const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
+  const [entryToDelete, setEntryToDelete] = useState<DiaryEntry | null>(null);
   const openQuickAdd = useOpenQuickAdd();
   const togglePriority = useTogglePriority();
   const deleteEntry = useDeleteEntry();
+  const [openEntryDetail, hasDetailView] = useOpenEntryDetail(onEntryClick);
   const clubLabel = CLUB_CATEGORIES.find((c) => c.value === entry?.club)?.label ?? entry?.club ?? "";
   const typeLabel = ENTRY_TYPES.find((t) => t.value === entry.entryType)?.label ?? entry.entryType;
   const swingPhaseLabel =
@@ -203,21 +207,21 @@ export function EntryCard({
       className={cn(
         "rounded-xl overflow-hidden bg-white border border-[var(--border)] shadow-[var(--shadow-sm)] transition-shadow",
         compact ? "p-3" : "p-4",
-        onEntryClick && "cursor-pointer hover:shadow-md"
+        hasDetailView && "cursor-pointer hover:shadow-md"
       )}
       onClick={(e) => {
-        if (onEntryClick && !(e.target as HTMLElement).closest("button")) {
-          onEntryClick(entry);
+        if (openEntryDetail && !(e.target as HTMLElement).closest("button")) {
+          openEntryDetail(entry);
         }
       }}
-      role={onEntryClick ? "button" : undefined}
-      tabIndex={onEntryClick ? 0 : undefined}
+      role={hasDetailView ? "button" : undefined}
+      tabIndex={hasDetailView ? 0 : undefined}
       onKeyDown={
-        onEntryClick
+        hasDetailView
           ? (e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                onEntryClick(entry);
+                openEntryDetail(entry);
               }
             }
           : undefined
@@ -288,7 +292,7 @@ export function EntryCard({
               </button>
               <button
                 type="button"
-                onClick={() => deleteEntry(entry.id)}
+                onClick={() => setEntryToDelete(entry)}
                 className="p-1.5 rounded-lg hover:bg-red-500/20 text-[var(--muted-foreground)] hover:text-red-400 transition-colors"
                 aria-label="Delete entry"
               >
@@ -365,6 +369,16 @@ export function EntryCard({
         imageUrl={lightboxImageUrl}
         open={lightboxImageUrl !== null}
         onOpenChange={(open) => !open && setLightboxImageUrl(null)}
+      />
+      <ConfirmDeleteEntryModal
+        open={entryToDelete !== null}
+        onOpenChange={(open) => !open && setEntryToDelete(null)}
+        onConfirm={() => {
+          if (entryToDelete) {
+            deleteEntry(entryToDelete.id);
+            setEntryToDelete(null);
+          }
+        }}
       />
     </>
   );

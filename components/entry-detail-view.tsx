@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import type { DiaryEntry, MediaItem } from "@/lib/types";
 import { fullMediaUrl, getEntryMedia } from "@/lib/utils";
 import { ImageLightbox } from "@/components/image-lightbox";
 import { VideoPlayerModal } from "@/components/video-player-modal";
-import { Video } from "lucide-react";
+import { LinkEntryPickerModal } from "@/components/link-entry-picker-modal";
+import { getLinkedEntryIds } from "@/lib/entry-connections";
+import { ENTRY_TYPES } from "@/lib/constants";
+import { useEntryDetail } from "@/lib/entry-detail-context";
+import { Video, Link2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function isAllowedImageUrl(url: string): boolean {
@@ -23,14 +27,37 @@ function isAllowedImageUrl(url: string): boolean {
 
 type Props = {
   entry: DiaryEntry;
+  allEntries?: DiaryEntry[];
   onVideoClick?: (url: string) => void;
   /** When true, render as standalone page content (no modal chrome). */
   standalone?: boolean;
+  /** Callback when connections change (e.g. refresh parent). */
+  onConnectionsChange?: () => void;
+  /** When provided, linked entry cards use this instead of opening in modal (e.g. navigate to /diary/[id]). */
+  onOpenLinkedEntry?: (entry: DiaryEntry) => void;
 };
 
-export function EntryDetailView({ entry, onVideoClick, standalone }: Props) {
+export function EntryDetailView({ entry, allEntries = [], onVideoClick, standalone, onConnectionsChange, onOpenLinkedEntry }: Props) {
   const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
   const [videoModalUrl, setVideoModalUrl] = useState<string | null>(null);
+  const [linkPickerOpen, setLinkPickerOpen] = useState(false);
+  const [connectionsVersion, setConnectionsVersion] = useState(0);
+
+  const linkedEntryIds = useMemo(
+    () => getLinkedEntryIds(entry.id),
+    [entry.id, connectionsVersion]
+  );
+  const linkedEntries = useMemo(() => {
+    const ids = new Set(linkedEntryIds);
+    return allEntries.filter((e) => ids.has(e.id));
+  }, [allEntries, linkedEntryIds]);
+
+  const handleConnectionsSaved = () => {
+    setConnectionsVersion((v) => v + 1);
+    onConnectionsChange?.();
+  };
+
+  const entryDetail = useEntryDetail();
 
   const instruction =
     entry.instruction ??
@@ -116,6 +143,40 @@ export function EntryDetailView({ entry, onVideoClick, standalone }: Props) {
             </div>
           )}
         </section>
+
+        {/* Link to another entry */}
+        <section className="space-y-3">
+          <button
+            type="button"
+            onClick={() => setLinkPickerOpen(true)}
+            className="inline-flex items-center gap-2 rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/5 px-4 py-2.5 text-sm font-medium text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-colors"
+          >
+            <Link2 className="h-4 w-4" />
+            Link to another entry
+          </button>
+        </section>
+
+        {/* Linked entries: small Masters-style cards */}
+        {linkedEntries.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
+              Linked entries
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {linkedEntries.map((linked) => (
+                <LinkedEntryCard
+                  key={linked.id}
+                  entry={linked}
+                  onOpen={() =>
+                    onOpenLinkedEntry
+                      ? onOpenLinkedEntry(linked)
+                      : entryDetail?.openEntryDetail(linked)
+                  }
+                />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
       <ImageLightbox
@@ -127,6 +188,15 @@ export function EntryDetailView({ entry, onVideoClick, standalone }: Props) {
         url={videoModalUrl}
         open={videoModalUrl !== null}
         onOpenChange={(open) => !open && setVideoModalUrl(null)}
+      />
+
+      <LinkEntryPickerModal
+        entry={entry}
+        allEntries={allEntries}
+        currentLinkedIds={linkedEntryIds}
+        open={linkPickerOpen}
+        onOpenChange={setLinkPickerOpen}
+        onSaved={handleConnectionsSaved}
       />
     </div>
   );
@@ -200,6 +270,36 @@ function MediaCell({
       ) : (
         <img src={url} alt="" className="w-full h-full object-cover" />
       )}
+    </button>
+  );
+}
+
+/** Small Masters-style card for a linked entry in Detail View. */
+function LinkedEntryCard({
+  entry,
+  onOpen,
+}: {
+  entry: DiaryEntry;
+  onOpen: () => void;
+}) {
+  const typeLabel = ENTRY_TYPES.find((t) => t.value === entry.entryType)?.label ?? entry.entryType;
+  const title =
+    (entry.instruction ??
+      (entry.entryType === "problem" && entry.cure ? entry.cure : entry.notes)) ||
+    "Untitled";
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="text-left rounded-xl border border-[var(--border)] bg-white p-4 shadow-[var(--shadow-sm)] hover:border-[var(--accent)]/30 hover:shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:ring-offset-2"
+    >
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
+        {typeLabel}
+      </span>
+      <p className="font-heading mt-1 text-base font-semibold text-[var(--heading)] line-clamp-2">
+        {title}
+      </p>
     </button>
   );
 }

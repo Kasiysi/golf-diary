@@ -10,7 +10,9 @@ import { Star } from "lucide-react";
 export default function PrioritiesPage() {
   const entries = useEntries();
   const [videoModalUrl, setVideoModalUrl] = useState<string | null>(null);
-  const filtered = entries.filter((e) => e.priority === true);
+  const filtered = [...entries]
+    .filter((e) => e.priority === true)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
     <motion.div

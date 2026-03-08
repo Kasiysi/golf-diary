@@ -42,7 +42,9 @@ export default function ClubPage() {
     );
   }
 
-  const clubEntries = entries.filter((e) => e.club === slug);
+  const clubEntries = [...entries]
+    .filter((e) => e.club === slug)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   const media = clubEntries.flatMap((e) => e.media);
 
   const byType = (type: EntryType) =>

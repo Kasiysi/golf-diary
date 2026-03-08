@@ -14,6 +14,7 @@ import {
   Circle,
   MessageCircle,
   Dumbbell,
+  Map,
 } from "lucide-react";
 import { CLUB_CATEGORIES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ const categoryIconMap: Record<string, React.ComponentType<{ className?: string }
 const nextSessionDrillLink = { href: "/next-session-drill", label: "Next Session Drill", icon: Dumbbell };
 
 const globalSections = [
+  { href: "/game-map", label: "Game Map", icon: Map },
   { href: "/priorities", label: "Priorities", icon: Star },
   { href: "/coach-advice", label: "Coach Advice", icon: MessageSquare },
   { href: "/manage-checklist", label: "Manage Checklist", icon: ListChecks },
